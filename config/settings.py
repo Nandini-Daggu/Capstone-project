@@ -46,6 +46,7 @@ _log = logging.getLogger(__name__)
 # nvidia/nemotron-3-ultra-550b-a55b confirmed working (from run logs Jul 2026).
 # Put nvidia FIRST as primary — it consistently succeeded where google/llama failed.
 VALID_FREE_MODELS: List[str] = [
+    "openrouter/openai/gpt-4o-mini",  # FAST — low latency, paid via OpenRouter
     "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",  # CONFIRMED WORKING
     "openrouter/meta-llama/llama-3.3-70b-instruct:free",
     "openrouter/google/gemma-4-31b-it:free",
@@ -55,9 +56,9 @@ VALID_FREE_MODELS: List[str] = [
 ]
 
 # Default fallback used when .env is missing or model is invalid
-_DEFAULT_PRIMARY = "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free"
-_DEFAULT_FALLBACK = "openrouter/meta-llama/llama-3.3-70b-instruct:free"
-_DEFAULT_LAST_RESORT = "openrouter/meta-llama/llama-3.2-3b-instruct:free"
+_DEFAULT_PRIMARY = "openrouter/openai/gpt-4o-mini"
+_DEFAULT_FALLBACK = "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free"
+_DEFAULT_LAST_RESORT = "openrouter/meta-llama/llama-3.3-70b-instruct:free"
 
 # ── OpenRouter base URL ───────────────────────────────────────────────────────
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
@@ -290,8 +291,9 @@ class Settings(BaseSettings):
           qwen3-coder         → Venice / Qwen
           gemma-4-26b         → Google AI Studio (separate quota)
         """
-        # Full ordered cascade — all 6 diverse models
+        # Full ordered cascade — gpt-4o-mini first (fastest), free models as fallback
         ordered = [
+            "openrouter/openai/gpt-4o-mini",
             "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
             "openrouter/meta-llama/llama-3.3-70b-instruct:free",
             "openrouter/google/gemma-4-31b-it:free",

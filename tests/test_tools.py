@@ -76,51 +76,39 @@ class TestCitationTool:
 
 
 class TestCacheManager:
-    """Tests for cache.py"""
+    """Tests for cache.py — uses MagicMock diskcache so no disk I/O needed."""
 
     def setup_method(self):
-        import tempfile
         from pathlib import Path
         from unittest.mock import MagicMock, patch
 
-        # Isolated temp directory - no shared disk state between tests.
-        self._tmpdir = tempfile.mkdtemp()
-        Path(self._tmpdir).mkdir(parents=True, exist_ok=True)
+        # Mock diskcache.Cache so every instance is a plain in-memory dict-like mock.
+        # This removes all filesystem / SQLite dependency from these unit tests.
+        self._fake_store = {}
 
-        self._mock_settings = MagicMock()
-        self._mock_settings.llm_cache_enabled = True
-        self._mock_settings.search_cache_enabled = True
-        self._mock_settings.embedding_cache_enabled = True
-        self._mock_settings.cache_dir = Path(self._tmpdir)
-        self._mock_settings.cache_ttl_seconds = 3600
+        def _fake_cache_factory(path, **kw):
+            store = self._fake_store
+            mock_cache = MagicMock()
+            mock_cache.__contains__ = lambda _self, k: k in store
+            mock_cache.__setitem__ = lambda _self, k, v: store.update({k: v})
+            mock_cache.__getitem__ = lambda _self, k: store[k]
+            mock_cache.get = lambda k, default=None: store.get(k, default)
+            mock_cache.set = lambda k, v, expire=None: store.update({k: v})
+            mock_cache.clear = lambda: store.clear()
+            return mock_cache
 
-        self._patch = patch("src.utils.cache.settings", self._mock_settings)
-        self._patch.start()
+        self._patch_dc = patch("src.utils.cache.diskcache.Cache", side_effect=_fake_cache_factory)
+        self._patch_dc.start()
 
-        # Import after patch so module globals pick up the mock
-        import importlib
+        from src.utils.cache import CacheManager
 
-        import src.utils.cache as _mod
-
-        importlib.reload(_mod)
-        self.cache = _mod.CacheManager()
+        self.cache = CacheManager()
 
     def teardown_method(self):
-        import importlib
-        import shutil
-
         try:
-            self._patch.stop()
+            self._patch_dc.stop()
         except RuntimeError:
             pass
-        # Reload module with real settings restored
-        try:
-            import src.utils.cache as _mod
-
-            importlib.reload(_mod)
-        except Exception:
-            pass
-        shutil.rmtree(self._tmpdir, ignore_errors=True)
 
     def test_llm_cache_miss(self):
         result = self.cache.get_llm("unique_prompt_xyz", "model")
