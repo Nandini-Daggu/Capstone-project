@@ -5,7 +5,7 @@
 #   lint        → code-style & type checks
 #   security    → dependency audit & SAST
 #   test        → unit + integration tests with coverage
-#   quality     → coverage gate + SonarCloud (optional)
+#   quality     → coverage gate
 #   docker      → build & smoke-test the Docker image
 #   deploy-dev  → deploy to dev environment (develop branch)
 #   deploy-prod → deploy to production (main branch, after manual approval)
@@ -94,7 +94,7 @@ jobs:
             --follow-imports=silent || true
 
   # ──────────────────────────────────────────────────────────────────────────
-  # 2. Security — dependency CVE audit + static analysis
+  # 2. Security — dependency CVE audit + SAST (no app install needed)
   # ──────────────────────────────────────────────────────────────────────────
   security:
     name: "Security Scan"
@@ -110,17 +110,18 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
 
-      - name: Install security tools
+      - name: Install security tools only
         run: |
           pip install --upgrade pip
           pip install pip-audit==2.9.0 bandit==1.9.4
 
       - name: Dependency vulnerability audit (pip-audit)
+        # Audit requirements.txt directly — no need to install all deps
         run: |
-          pip install -r requirements.txt --quiet
-          pip-audit --ignore-vuln GHSA-r9dh-gcmq-qwpq || true
-        # pip-audit replaces safety check (no API key required)
-        # --ignore-vuln: suppress known false-positive advisory IDs
+          pip-audit --requirement requirements.txt \
+            --skip-editable \
+            --ignore-vuln GHSA-r9dh-gcmq-qwpq \
+            || true
 
       - name: SAST scan (bandit)
         run: |
@@ -135,7 +136,7 @@ jobs:
         if: always()
         with:
           sarif_file: bandit-results.sarif
-        continue-on-error: true  # SARIF upload is best-effort
+        continue-on-error: true
 
       - name: Check for secrets in code (gitleaks)
         uses: gitleaks/gitleaks-action@v2
@@ -167,10 +168,10 @@ jobs:
           cache: pip
 
       - name: Install dependencies
+        # requirements.txt already includes pytest-timeout==2.3.1 — no separate install needed
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest-timeout==2.3.1
 
       - name: Create required directories
         run: |
@@ -184,9 +185,13 @@ jobs:
             -v \
             --tb=short \
             --timeout=60 \
-            --no-header
+            --no-header \
+            --no-cov
+        env:
+          OPENROUTER_API_KEY: test-key-not-real
+          DATABASE_URL: sqlite:///./database/test_intelligence.db
 
-      - name: Run integration tests
+      - name: Run integration tests with coverage
         run: |
           pytest tests/ \
             -m "not slow and not crew" \
@@ -248,10 +253,8 @@ jobs:
       - name: Install coverage
         run: pip install coverage==7.6.9
 
-      - name: Enforce coverage threshold
+      - name: Enforce coverage threshold (60%)
         run: |
-          coverage report --fail-under=60 --rcfile=/dev/null \
-            --data-file=/dev/null || \
           python -c "
           import xml.etree.ElementTree as ET
           tree = ET.parse('coverage.xml')
@@ -377,12 +380,11 @@ jobs:
               up -d --remove-orphans
             docker image prune -f
             echo "Dev deploy complete: $(date)"
-        continue-on-error: true  # Dev deploy failures are non-blocking
+        continue-on-error: true
 
       - name: Notify dev deploy
         if: always()
-        run: |
-          echo "::notice title=Dev Deploy::Image ${{ env.IMAGE_NAME }}:develop deployed"
+        run: echo "::notice title=Dev Deploy::Image ${{ env.IMAGE_NAME }}:develop deployed"
 
   # ──────────────────────────────────────────────────────────────────────────
   # 7. Deploy to Production (main branch only, requires approval)
@@ -409,9 +411,7 @@ jobs:
           script: |
             set -euo pipefail
             cd /opt/competitive-intelligence-crew
-            # Pull the new image
             docker pull ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:main
-            # Zero-downtime rolling restart
             docker-compose up -d --no-deps --scale app=2 app
             sleep 15
             docker-compose up -d --no-deps --scale app=1 app
