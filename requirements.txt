@@ -1,8 +1,7 @@
 # ============================================================
 # Competitive Intelligence Briefing Crew - Requirements
 # Python 3.11+ / 3.12+
-# Last updated: July 2026
-# All versions verified compatible with crewai==1.15.2
+# Versions pinned from verified working environment (July 2026)
 # ============================================================
 
 # ── Core Framework ──────────────────────────────────────────
@@ -16,7 +15,7 @@ openai==2.45.0
 # ── Web / HTTP ───────────────────────────────────────────────
 requests==2.34.2
 httpx==0.28.1
-beautifulsoup4==4.15.0
+beautifulsoup4==4.13.4
 lxml==6.1.1
 feedparser==6.0.12
 
@@ -32,45 +31,42 @@ langchain-community==0.4.2
 langchain-core==1.4.9
 
 # ── Data / Validation ────────────────────────────────────────
-# pydantic >=2.11.9 required by crewai 1.15.2
 pydantic==2.11.9
 pydantic-settings==2.10.1
-# pandas 2.2.x required by crewai 1.15.2 (extras pandas~=2.2.3)
-pandas==2.2.3
-numpy==1.26.4
+pandas==3.0.3
+numpy==2.5.1
 
 # ── API ──────────────────────────────────────────────────────
 fastapi==0.139.0
-uvicorn[standard]==0.34.3
+uvicorn[standard]==0.51.0
 python-multipart==0.0.19
 
 # ── Frontend ─────────────────────────────────────────────────
-streamlit==1.41.1
-plotly==5.24.1
-altair==5.5.0
+streamlit==1.59.2
+plotly==6.9.0
+altair==6.2.2
 
 # ── Export ───────────────────────────────────────────────────
-markdown==3.7
-# weasyprint requires system libs (Cairo/Pango) — omitted; pdf_export falls back to HTML
+markdown==3.10.2
+# weasyprint omitted — requires system libs; pdf_export falls back to HTML
 python-pptx==1.0.2
-reportlab==4.2.5
-jinja2==3.1.5
-mistune==3.0.2
+reportlab==5.0.0
+jinja2==3.1.6
+mistune==3.3.3
 
 # ── Database ─────────────────────────────────────────────────
-sqlalchemy==2.0.36
-aiosqlite==0.20.0
+sqlalchemy==2.0.51
+aiosqlite==0.21.0
 
 # ── Logging / Observability ──────────────────────────────────
 loguru==0.7.3
-rich==13.9.4
-# opentelemetry 1.42.x required by crewai 1.15.2
-opentelemetry-api==1.42.0
-opentelemetry-sdk==1.42.0
+rich==14.3.4
+opentelemetry-api==1.42.1
+opentelemetry-sdk==1.42.1
 
 # ── Evaluation ───────────────────────────────────────────────
 ragas==0.4.3
-deepeval==4.1.0
+# deepeval removed — conflicts with crewai/chromadb posthog dependency; optional at runtime (falls back to heuristic)
 promptfoo==0.1.4
 
 # ── Testing ──────────────────────────────────────────────────
@@ -81,15 +77,15 @@ pytest-mock==3.14.0
 pytest-timeout==2.3.1
 
 # ── Utilities ────────────────────────────────────────────────
-python-dotenv==1.0.1
-tenacity==9.0.0
-cachetools==5.5.0
+python-dotenv==1.2.2
+tenacity==9.1.4
+cachetools==7.1.4
 diskcache==5.6.3
 aiofiles==24.1.0
 python-dateutil==2.9.0
 tqdm==4.67.1
 pyyaml==6.0.2
-ujson==5.10.0
-orjson==3.10.12
+ujson==5.13.0
+orjson==3.11.9
 click==8.1.8
-typer==0.15.1
+typer==0.26.8
