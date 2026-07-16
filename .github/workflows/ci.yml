@@ -32,6 +32,7 @@ env:
   PYTHON_VERSION: "3.12"
   IMAGE_NAME: competitive-intelligence-crew
   REGISTRY: ghcr.io
+  OWNER: nandini-daggu
   # Safe test-only keys — real keys must be in GitHub Secrets
   OPENROUTER_API_KEY: test-key-not-real
   DATABASE_URL: sqlite:///./database/test_intelligence.db
@@ -364,8 +365,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository_owner | lower }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
-            ${{ env.REGISTRY }}/${{ github.repository_owner | lower }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
 
   # ──────────────────────────────────────────────────────────────────────────
@@ -392,7 +393,7 @@ jobs:
           key: ${{ secrets.DEV_SSH_KEY }}
           script: |
             cd /opt/competitive-intelligence-crew
-            docker pull ${{ env.REGISTRY }}/${{ github.repository_owner | lower }}/${{ env.IMAGE_NAME }}:develop
+            docker pull ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:develop
             docker-compose -f docker-compose.yml \
               -f docker-compose.dev.yml \
               up -d --remove-orphans
@@ -429,7 +430,7 @@ jobs:
           script: |
             set -euo pipefail
             cd /opt/competitive-intelligence-crew
-            docker pull ${{ env.REGISTRY }}/${{ github.repository_owner | lower }}/${{ env.IMAGE_NAME }}:main
+            docker pull ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:main
             docker-compose up -d --no-deps --scale app=2 app
             sleep 15
             docker-compose up -d --no-deps --scale app=1 app
