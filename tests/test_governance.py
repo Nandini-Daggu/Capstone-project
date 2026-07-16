@@ -78,18 +78,22 @@ class TestGovernanceGuard:
         assert "step" in reason.lower()
 
     def test_time_limit_exceeded(self):
-        from config.settings import settings
+        # Patch the settings limit to a known value so this test is completely
+        # independent of whatever MAX_RUNTIME_SECONDS is set to in any environment.
+        from unittest.mock import patch
 
-        # Use a value guaranteed to exceed the configured limit regardless of
-        # what MAX_RUNTIME_SECONDS is set to in the environment (CI vs local).
-        over_limit = float(settings.max_runtime_seconds + 100)
-        ok, reason = self.guard.check_run_limits(
-            run_id="run-008",
-            sources_used=5,
-            steps_used=10,
-            elapsed_seconds=over_limit,
-            estimated_cost=0.005,
-        )
+        with patch("src.agents.supervisor.settings") as mock_settings:
+            mock_settings.max_sources = 100
+            mock_settings.max_steps = 100
+            mock_settings.max_runtime_seconds = 300
+            mock_settings.max_cost_usd = 1.0
+            ok, reason = self.guard.check_run_limits(
+                run_id="run-008",
+                sources_used=5,
+                steps_used=10,
+                elapsed_seconds=400.0,  # 400 > 300
+                estimated_cost=0.005,
+            )
         assert ok is False
         assert "time" in reason.lower()
 

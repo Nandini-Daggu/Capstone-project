@@ -79,11 +79,48 @@ class TestCacheManager:
     """Tests for cache.py"""
 
     def setup_method(self):
-        from src.utils.cache import CacheManager
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import MagicMock, patch
 
-        self.cache = CacheManager()
-        # Clear all tiers so prior test runs cannot pollute this instance.
-        self.cache.clear_all()
+        # Isolated temp directory - no shared disk state between tests.
+        self._tmpdir = tempfile.mkdtemp()
+        Path(self._tmpdir).mkdir(parents=True, exist_ok=True)
+
+        self._mock_settings = MagicMock()
+        self._mock_settings.llm_cache_enabled = True
+        self._mock_settings.search_cache_enabled = True
+        self._mock_settings.embedding_cache_enabled = True
+        self._mock_settings.cache_dir = Path(self._tmpdir)
+        self._mock_settings.cache_ttl_seconds = 3600
+
+        self._patch = patch("src.utils.cache.settings", self._mock_settings)
+        self._patch.start()
+
+        # Import after patch so module globals pick up the mock
+        import importlib
+
+        import src.utils.cache as _mod
+
+        importlib.reload(_mod)
+        self.cache = _mod.CacheManager()
+
+    def teardown_method(self):
+        import importlib
+        import shutil
+
+        try:
+            self._patch.stop()
+        except RuntimeError:
+            pass
+        # Reload module with real settings restored
+        try:
+            import src.utils.cache as _mod
+
+            importlib.reload(_mod)
+        except Exception:
+            pass
+        shutil.rmtree(self._tmpdir, ignore_errors=True)
 
     def test_llm_cache_miss(self):
         result = self.cache.get_llm("unique_prompt_xyz", "model")
@@ -99,11 +136,9 @@ class TestCacheManager:
         assert result is None
 
     def test_search_cache_set_get(self):
-        # Use a unique key that cannot clash with any other test's writes.
-        query = "test_search_cache_set_get_unique_key_abc123"
         data = [{"title": "Test", "url": "https://test.com"}]
-        self.cache.set_search(query, data, "duckduckgo")
-        result = self.cache.get_search(query, "duckduckgo")
+        self.cache.set_search("test query abc", data, "duckduckgo")
+        result = self.cache.get_search("test query abc", "duckduckgo")
         assert result == data
 
     def test_stats(self):
