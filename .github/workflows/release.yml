@@ -163,7 +163,7 @@ jobs:
         id: docker-meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner | lower }}/${{ env.IMAGE_NAME }}
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -176,7 +176,7 @@ jobs:
 
       - name: Build and push
         id: push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
@@ -263,7 +263,7 @@ jobs:
           VERSION="${{ needs.validate.outputs.version }}"
           IS_PRE="${{ needs.validate.outputs.is_prerelease }}"
           DIGEST="${{ needs.build.outputs.image_digest }}"
-          REGISTRY_URL="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}"
+          REGISTRY_URL="${{ env.REGISTRY }}/${{ github.repository_owner | lower }}/${{ env.IMAGE_NAME }}"
 
           cat > release_notes.md << NOTES
           ## Competitive Intelligence Crew v${VERSION}
