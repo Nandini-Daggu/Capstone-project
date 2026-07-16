@@ -81,8 +81,16 @@ class IntelligenceCrew:
             return raw
         # Known OpenRouter provider namespaces — add prefix back
         OPENROUTER_PROVIDERS = (
-            "google/", "anthropic/", "openai/", "meta-llama/", "mistralai/",
-            "cohere/", "deepseek/", "qwen/", "nvidia/", "x-ai/",
+            "google/",
+            "anthropic/",
+            "openai/",
+            "meta-llama/",
+            "mistralai/",
+            "cohere/",
+            "deepseek/",
+            "qwen/",
+            "nvidia/",
+            "x-ai/",
         )
         if any(raw.startswith(p) for p in OPENROUTER_PROVIDERS):
             return f"openrouter/{raw}"

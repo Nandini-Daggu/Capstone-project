@@ -149,8 +149,13 @@ class TestIntelligenceCrewRun:
     ):
         for m in (mock_ra, mock_aa, mock_wa, mock_sa):
             m.return_value = MagicMock()
-        for t in (mock_task_crew, mock_task_research, mock_task_supervisor,
-                  mock_task_analyst, mock_task_writer):
+        for t in (
+            mock_task_crew,
+            mock_task_research,
+            mock_task_supervisor,
+            mock_task_analyst,
+            mock_task_writer,
+        ):
             t.return_value = MagicMock()
 
         mock_crew_instance = MagicMock()
@@ -206,8 +211,13 @@ class TestIntelligenceCrewRun:
     ):
         for m in (mock_ra, mock_aa, mock_wa, mock_sa):
             m.return_value = MagicMock()
-        for t in (mock_task_crew, mock_task_research, mock_task_supervisor,
-                  mock_task_analyst, mock_task_writer):
+        for t in (
+            mock_task_crew,
+            mock_task_research,
+            mock_task_supervisor,
+            mock_task_analyst,
+            mock_task_writer,
+        ):
             t.return_value = MagicMock()
 
         mock_crew_instance = MagicMock()
@@ -258,8 +268,13 @@ class TestIntelligenceCrewRun:
     ):
         for m in (mock_ra, mock_aa, mock_wa, mock_sa):
             m.return_value = MagicMock()
-        for t in (mock_task_crew, mock_task_research, mock_task_supervisor,
-                  mock_task_analyst, mock_task_writer):
+        for t in (
+            mock_task_crew,
+            mock_task_research,
+            mock_task_supervisor,
+            mock_task_analyst,
+            mock_task_writer,
+        ):
             t.return_value = MagicMock()
 
         mock_crew_instance = MagicMock()
@@ -310,8 +325,13 @@ class TestIntelligenceCrewRun:
     ):
         for m in (mock_ra, mock_aa, mock_wa, mock_sa):
             m.return_value = MagicMock()
-        for t in (mock_task_crew, mock_task_research, mock_task_supervisor,
-                  mock_task_analyst, mock_task_writer):
+        for t in (
+            mock_task_crew,
+            mock_task_research,
+            mock_task_supervisor,
+            mock_task_analyst,
+            mock_task_writer,
+        ):
             t.return_value = MagicMock()
 
         mock_crew_instance = MagicMock()
