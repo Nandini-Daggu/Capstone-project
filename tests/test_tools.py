@@ -82,6 +82,8 @@ class TestCacheManager:
         from src.utils.cache import CacheManager
 
         self.cache = CacheManager()
+        # Clear all tiers so prior test runs cannot pollute this instance.
+        self.cache.clear_all()
 
     def test_llm_cache_miss(self):
         result = self.cache.get_llm("unique_prompt_xyz", "model")
@@ -97,9 +99,11 @@ class TestCacheManager:
         assert result is None
 
     def test_search_cache_set_get(self):
+        # Use a unique key that cannot clash with any other test's writes.
+        query = "test_search_cache_set_get_unique_key_abc123"
         data = [{"title": "Test", "url": "https://test.com"}]
-        self.cache.set_search("test query abc", data, "duckduckgo")
-        result = self.cache.get_search("test query abc", "duckduckgo")
+        self.cache.set_search(query, data, "duckduckgo")
+        result = self.cache.get_search(query, "duckduckgo")
         assert result == data
 
     def test_stats(self):
