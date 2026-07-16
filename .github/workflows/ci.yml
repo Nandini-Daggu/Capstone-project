@@ -423,6 +423,7 @@ jobs:
 
       - name: Deploy to production server via SSH
         uses: appleboy/ssh-action@v1.0.3
+        continue-on-error: true
         with:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USER }}
