@@ -180,9 +180,10 @@ class Settings(BaseSettings):
     top_k_results: int = Field(default=5, alias="TOP_K_RESULTS")
 
     # ── Run Limits ───────────────────────────────────────────────────────────
-    max_sources: int = Field(default=15, alias="MAX_SOURCES")
-    max_steps: int = Field(default=25, alias="MAX_STEPS")
-    max_runtime_seconds: int = Field(default=900, alias="MAX_RUNTIME_SECONDS")
+    # Reduced defaults for faster output (overridable via .env)
+    max_sources: int = Field(default=5, alias="MAX_SOURCES")
+    max_steps: int = Field(default=10, alias="MAX_STEPS")
+    max_runtime_seconds: int = Field(default=300, alias="MAX_RUNTIME_SECONDS")
     max_cost_usd: float = Field(default=0.02, alias="MAX_COST_USD")
 
     # ── Logging ──────────────────────────────────────────────────────────────

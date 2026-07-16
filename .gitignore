@@ -2,12 +2,20 @@
 # Competitive Intelligence Briefing Crew - .gitignore
 # ============================================================
 
-# Environment
+# ── Secrets ──────────────────────────────────────────────────
 .env
 .env.local
 .env.*.local
 
-# Python
+# ── Virtual Environments ─────────────────────────────────────
+venv312/
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# ── Python bytecode ──────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
@@ -26,14 +34,39 @@ lib/
 lib64/
 *.whl
 
-# Virtual Environments
-.venv/
-venv/
-env/
-ENV/
-.python-version
+# ── Database (all SQLite files including WAL/SHM journals) ───
+database/*.db
+database/*.db-shm
+database/*.db-wal
+database/*.sqlite
+database/*.sqlite-shm
+database/*.sqlite-wal
+*.db
+*.db-shm
+*.db-wal
+*.sqlite3
 
-# Testing
+# ── Logs ─────────────────────────────────────────────────────
+logs/
+*.log
+*.jsonl
+
+# ── Generated outputs ────────────────────────────────────────
+outputs/
+*.pdf
+*.pptx
+
+# ── Cache ────────────────────────────────────────────────────
+cache/
+.cache/
+*.diskcache/
+
+# ── Vector Store ─────────────────────────────────────────────
+knowledge_base/vectorstore/
+*.faiss
+*.pkl
+
+# ── Testing ──────────────────────────────────────────────────
 .pytest_cache/
 .coverage
 htmlcov/
@@ -42,34 +75,7 @@ coverage.xml
 nosetests.xml
 test-results/
 
-# Logs
-logs/
-*.log
-*.jsonl
-
-# Outputs
-outputs/
-*.pdf
-*.pptx
-
-# Cache
-cache/
-.cache/
-*.diskcache/
-__pycache__/
-
-# Database
-database/*.db
-database/*.sqlite
-*.db
-*.sqlite3
-
-# Vector Store
-knowledge_base/vectorstore/
-*.faiss
-*.pkl
-
-# IDE
+# ── IDE ──────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
@@ -77,25 +83,25 @@ knowledge_base/vectorstore/
 .DS_Store
 Thumbs.db
 
-# Jupyter
+# ── Jupyter ──────────────────────────────────────────────────
 .ipynb_checkpoints/
 *.ipynb
 
-# Docker
+# ── Docker ───────────────────────────────────────────────────
 .docker/
 
-# OS
+# ── OS ───────────────────────────────────────────────────────
 .DS_Store
 *.tmp
 *.bak
 *.orig
 
-# Secrets
+# ── Secrets / Credentials ────────────────────────────────────
 *.pem
 *.key
 credentials.json
 service-account.json
 
-# Node (for promptfoo)
+# ── Node (for promptfoo) ─────────────────────────────────────
 node_modules/
 package-lock.json
