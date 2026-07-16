@@ -80,7 +80,7 @@ class ResearchAgent:
         self,
         model=None,  # str model name OR a crewai.llm.LLM instance
         verbose: bool = False,
-        max_iter: int = 8,
+        max_iter: int = 5,
         additional_tools: Optional[List[BaseTool]] = None,
     ) -> None:
         # Accept either a plain string or a pre-built LLM object (e.g. CascadeLLM)
@@ -122,7 +122,7 @@ class ResearchAgent:
             verbose=self.verbose,
             allow_delegation=False,
             max_iter=self.max_iter,
-            memory=True,
+            memory=False,  # disabled — no embedder overhead, faster startup
             llm=self.model,
         )
         return self._agent
@@ -137,36 +137,43 @@ class ResearchAgent:
     ) -> Task:
         """Create the research task for this agent."""
         competitors_str = ", ".join(competitors)
+        # Build a tightly-scoped query so the agent doesn't over-tool-call.
+        # One combined search covers all competitors at once; individual
+        # scrapes are only done for the most important URLs found.
+        primary = competitors[0] if competitors else "company"
+        all_competitors_query = " OR ".join(f'"{c}"' for c in competitors)
 
-        description = f"""
-Research competitive intelligence for:
-- Industry: {industry}
-- Competitors: {competitors_str}
-- Region: {region}
-- Time Period: {time_period}
-- Run ID: {run_id}
-
-For EACH competitor, use the available tools to:
-1. Search for recent news: web_search("{competitors[0] if competitors else 'company'} news {time_period}")
-2. Search for pricing: news_search("{competitors[0] if competitors else 'company'} pricing 2024 2025")
-3. Check market intelligence: market_intelligence(company="{competitors[0] if competitors else 'company'}", data_type="all")
-4. Search knowledge base: rag_search(action="search", query="{industry} {competitors[0] if competitors else 'company'}")
-
-IMPORTANT:
-- Stay within {settings.max_sources} total sources
-- Stay within {settings.max_steps} total tool calls
-- Include URL, date, source name, and snippet for every item
-- Skip any source that fails to load
-- Do NOT invent data
-"""
+        description = (
+            f"Research competitive intelligence for the {industry} industry.\n"
+            f"Competitors: {competitors_str}\n"
+            f"Region: {region} | Period: {time_period} | Run ID: {run_id}\n\n"
+            "STEPS — execute in order, stop early if limit is reached:\n"
+            f'1. web_search("{all_competitors_query} {industry} news {time_period}") '
+            f"— ONE call covering ALL competitors at once.\n"
+            f'2. news_search("{industry} {primary} pricing product update {time_period}") '
+            "— ONE combined news call.\n"
+            f'3. market_intelligence(company="{primary}", data_type="all") '
+            "— market data for the primary competitor only.\n"
+            "4. For each URL returned above, call web_scraper ONLY on the 3 most relevant "
+            "URLs (skip the rest). These 3 fetches run in parallel internally — do NOT call "
+            "web_scraper in a loop for all URLs.\n"
+            f'5. rag_search(action="search", query="{industry} {primary}") '
+            "— knowledge base lookup.\n\n"
+            f"HARD LIMITS: max {settings.max_sources} sources, "
+            f"max {settings.max_steps} total tool calls. Stop immediately when reached.\n"
+            "For every item include: competitor, category, title, summary, "
+            "source_url, source_name, published_date, snippet, confidence.\n"
+            "Skip any source that fails to load. Do NOT invent data."
+        )
 
         return Task(
             description=description,
             expected_output=(
-                "A comprehensive structured list of competitive intelligence items. "
-                "Each item must have: competitor, category, title, summary, "
+                "A concise structured list of competitive intelligence items. "
+                "Each item: competitor, category, title, summary, "
                 "source_url, source_name, published_date, snippet, confidence. "
-                f"Cover all {len(competitors)} competitors across news, pricing, products, and market events."
+                f"Cover all {len(competitors)} competitors. "
+                "Maximum 15 items total — quality over quantity."
             ),
             agent=self._agent,
         )

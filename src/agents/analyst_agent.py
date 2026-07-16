@@ -69,7 +69,7 @@ class AnalystAgent:
         self,
         model=None,  # str model name OR a crewai.llm.LLM instance
         verbose: bool = False,
-        max_iter: int = 8,
+        max_iter: int = 5,
         additional_tools: Optional[List[BaseTool]] = None,
     ) -> None:
         self.model = model if model is not None else settings.model_primary
@@ -104,7 +104,7 @@ class AnalystAgent:
             verbose=self.verbose,
             allow_delegation=False,
             max_iter=self.max_iter,
-            memory=True,
+            memory=False,  # disabled — no embedder overhead, faster execution
             llm=self.model,
         )
         return self._agent

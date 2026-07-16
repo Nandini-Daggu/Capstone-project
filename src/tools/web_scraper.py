@@ -10,7 +10,8 @@ from __future__ import annotations
 
 import hashlib
 import re
-from typing import Type
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Dict, List, Type
 from urllib.parse import urlparse
 
 import requests
@@ -22,6 +23,10 @@ from config.settings import settings
 from src.utils.cache import cache_manager
 from src.utils.logger import get_logger
 from src.utils.retry import get_circuit_breaker
+
+# Number of parallel fetch threads — 5 collapses 8 sequential fetches
+# (~2-3 s each) down to the time of the single slowest fetch.
+_PARALLEL_FETCH_WORKERS = 5
 
 log = get_logger(__name__)
 
@@ -252,8 +257,46 @@ class WebScraperTool(BaseTool):
         except Exception as exc:
             return f"PDF extraction failed: {exc}"
 
+    # ── Parallel batch API ──────────────────────────────────────────────────
+
+    def scrape_many(
+        self,
+        urls: List[str],
+        extract_type: str = "text",
+        max_chars: int = 5000,
+    ) -> Dict[str, str]:
+        """
+        Fetch multiple URLs in parallel using up to _PARALLEL_FETCH_WORKERS threads.
+
+        Returns a dict mapping url → scraped text (or error string).
+        Fetching 8 URLs one-by-one at ~2-3 s each would add 16-24 s of latency.
+        With 5 parallel workers that collapses to the time of the single slowest
+        fetch — typically 2-4 s total.
+        """
+        if not urls:
+            return {}
+
+        results: Dict[str, str] = {}
+        workers = min(_PARALLEL_FETCH_WORKERS, len(urls))
+
+        log.debug(f"[Scraper] Parallel fetch: {len(urls)} URLs with {workers} workers")
+
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            future_to_url = {
+                pool.submit(self._run, url, extract_type, max_chars): url for url in urls
+            }
+            for future in as_completed(future_to_url):
+                url = future_to_url[future]
+                try:
+                    results[url] = future.result()
+                except Exception as exc:
+                    log.warning(f"[Scraper] Parallel fetch failed for {url}: {exc}")
+                    results[url] = f"Could not scrape {url}: {exc}"
+
+        return results
+
 
 # Singleton
 web_scraper_tool = WebScraperTool()
 
-__all__ = ["WebScraperTool", "web_scraper_tool"]
+__all__ = ["WebScraperTool", "web_scraper_tool", "_PARALLEL_FETCH_WORKERS"]

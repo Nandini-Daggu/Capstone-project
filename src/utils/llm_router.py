@@ -266,12 +266,17 @@ def make_cascade_llm(cascade: Optional[List[str]] = None) -> LLM:
     # ── Create the primary LLM instance ──────────────────────
     # CrewAI's LLM.__init__ strips the "openrouter/" prefix and stores the
     # remainder in llm.model. The base_url routes HTTP to OpenRouter.
+    # temperature=0.1 → deterministic, fast token generation.
+    # max_tokens=4096 → caps worst-case response length per call.
     llm = LLM(
         model=primary_full,
         api_key=api_key,
         base_url=OPENROUTER_BASE_URL,
+        temperature=0.1,
+        max_tokens=4096,
     )
     log.info(f"[LLM]   llm.model stored as: {llm.model!r}")
+    log.info("[LLM]   temperature=0.1  max_tokens=4096")
 
     # ── Cascade state ─────────────────────────────────────────
     state = _CascadeState(full_cascade)
