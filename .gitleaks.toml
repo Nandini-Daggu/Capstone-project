@@ -1,17 +1,32 @@
 # .gitleaks.toml
-# Ignore known false-positive patterns (placeholder/example values, not real secrets)
+# Gitleaks v2 configuration
+# Suppress false-positive placeholder values — these are NOT real secrets.
+
+title = "Competitive Intelligence Crew — gitleaks config"
 
 [allowlist]
-  description = "Ignore example placeholder values"
-  paths = [
-    ".env.example",
-    "README.md",
-  ]
-  regexes = [
-    # Placeholder API key patterns used in docs/examples
+description = "Ignore placeholder/example values and local .env files"
+
+# Paths to skip entirely (local env file with real keys is gitignored,
+# but .env.example contains only placeholder values)
+paths = [
+    '''.env\.example''',
+    '''.env\.local''',
+    '''^\.env\.',
+    '''README\.md''',
+]
+
+# Regex patterns that match placeholder/example values (not real secrets)
+regexes = [
+    # OpenRouter placeholder pattern (x's or zeroes, not real hex)
     '''sk-or-v1-x{10,}''',
+    # Tavily placeholder
     '''tvly-x{10,}''',
+    # Generic placeholder strings
     '''test-key-not-real''',
     '''your-key-here''',
+    '''your-openrouter-api-key-here''',
     '''change-me-in-production''',
-  ]
+    # CI pipeline test key (used in ci.yml env vars)
+    '''OPENROUTER_API_KEY:\s*test-key-not-real''',
+]

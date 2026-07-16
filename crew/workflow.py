@@ -335,10 +335,10 @@ class IntelligenceWorkflow:
         run_id: str,
         formats: List[str],
     ) -> Dict[str, str]:
-        """Generate all requested export formats."""
+        """Generate all requested export formats in parallel."""
         paths: Dict[str, str] = {}
 
-        for fmt in formats:
+        def _export_one(fmt: str) -> tuple:
             try:
                 if fmt == "markdown":
                     result = report_export_tool._run(briefing_text, "markdown", run_id)
@@ -351,14 +351,21 @@ class IntelligenceWorkflow:
                 elif fmt == "pptx":
                     result = ppt_export_tool._run(briefing_text, run_id=run_id)
                 else:
-                    continue
+                    return fmt, None
                 # Extract path from result string
                 if ":" in result:
                     path_part = result.split(":")[-1].strip()
-                    paths[fmt] = path_part
-                log.info(f"[Workflow] Export {fmt}: {result}")
+                    return fmt, path_part
+                return fmt, None
             except Exception as exc:
                 log.warning(f"[Workflow] Export {fmt} failed: {exc}")
+                return fmt, None
+
+        with ThreadPoolExecutor(max_workers=min(len(formats), 4)) as pool:
+            for fmt, path in pool.map(_export_one, formats):
+                if path:
+                    paths[fmt] = path
+                    log.info(f"[Workflow] Export {fmt}: {path}")
 
         return paths
 

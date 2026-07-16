@@ -186,7 +186,6 @@ class PPTExportTool(BaseTool):
 
     def _fill_background(self, slide, color: Tuple[int, int, int]) -> None:
         """Fill slide background with a solid colour."""
-
         background = slide.shapes.add_shape(
             1,
             0,

@@ -79,8 +79,8 @@ class ResearchAgent:
     def __init__(
         self,
         model=None,  # str model name OR a crewai.llm.LLM instance
-        verbose: bool = True,
-        max_iter: int = 15,
+        verbose: bool = False,
+        max_iter: int = 8,
         additional_tools: Optional[List[BaseTool]] = None,
     ) -> None:
         # Accept either a plain string or a pre-built LLM object (e.g. CascadeLLM)

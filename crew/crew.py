@@ -48,7 +48,7 @@ class IntelligenceCrew:
         self,
         model: Optional[str] = None,
         model_cascade: Optional[List[str]] = None,
-        verbose: bool = True,
+        verbose: bool = False,
     ) -> None:
         cascade = list(model_cascade or settings.model_cascade)
         if model and model not in cascade:

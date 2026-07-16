@@ -85,17 +85,17 @@ def _should_cascade(exc: Exception) -> bool:
 
 
 def _parse_retry_after(exc: Exception) -> float:
-    """Parse Retry-After seconds from error message. Default: 35s."""
+    """Parse Retry-After seconds from error message. Default: 20s."""
     text = str(exc)
     # Try exact retry_after_seconds field first
     m = re.search(r"retry_after_seconds['\"]?\s*[:\s]+([0-9.]+)", text, re.IGNORECASE)
     if m:
-        return float(m.group(1)) + 3.0
+        return min(float(m.group(1)) + 2.0, 60.0)
     # Try Retry-After header value
     m = re.search(r"Retry-After['\"]?\s*[:\s]+([0-9]+)", text)
     if m:
-        return float(m.group(1)) + 3.0
-    return 35.0
+        return min(float(m.group(1)) + 2.0, 60.0)
+    return 20.0  # reduced from 35s — retry sooner across diverse providers
 
 
 def _strip_prefix(model: str) -> str:
@@ -313,7 +313,7 @@ def make_cascade_llm(cascade: Optional[List[str]] = None) -> LLM:
         - Track permanently-failed models separately; when ALL are permanently
           failed, raise RuntimeError.
         """
-        MAX_WAIT_TOTAL = 300  # 5 minutes max total wait before giving up
+        MAX_WAIT_TOTAL = 120  # 2 minutes max wait before giving up
         total_waited = 0.0
 
         while True:

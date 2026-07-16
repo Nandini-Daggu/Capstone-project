@@ -27,7 +27,7 @@ _news_breaker = get_circuit_breaker("news_search")
 
 class NewsSearchInput(BaseModel):
     query: str = Field(..., description="News search query, e.g. 'Salesforce funding 2024'")
-    max_results: int = Field(default=8, ge=1, le=20)
+    max_results: int = Field(default=5, ge=1, le=20)
     days_back: int = Field(default=7, ge=1, le=90, description="How many days back to search")
     include_rss: bool = Field(default=True, description="Include Google News RSS results")
 
@@ -52,7 +52,7 @@ class NewsSearchTool(BaseTool):
     def _run(
         self,
         query: str,
-        max_results: int = 8,
+        max_results: int = 5,
         days_back: int = 7,
         include_rss: bool = True,
     ) -> str:

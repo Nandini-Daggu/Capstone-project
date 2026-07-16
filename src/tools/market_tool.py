@@ -95,7 +95,7 @@ class MarketIntelligenceTool(BaseTool):
         # Determine query templates
         if data_type == "all":
             templates = []
-            for k, v in QUERY_TEMPLATES.items():
+            for _k, v in QUERY_TEMPLATES.items():
                 templates.extend(v[:1])  # Take first query per category
         else:
             templates = QUERY_TEMPLATES.get(data_type, QUERY_TEMPLATES["product"])
@@ -103,7 +103,7 @@ class MarketIntelligenceTool(BaseTool):
         all_results = []
         time_filter = "m" if days_back <= 30 else "y"
 
-        for template in templates[:5]:  # Max 5 queries per company
+        for template in templates[:3]:  # Max 3 queries per company to stay fast
             query = template.format(company=company)
             try:
                 results = _market_breaker.call(self._search, query, time_filter)

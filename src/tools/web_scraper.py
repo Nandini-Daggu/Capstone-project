@@ -126,7 +126,7 @@ class WebScraperTool(BaseTool):
         response = requests.get(
             url,
             headers=HEADERS,
-            timeout=15,
+            timeout=8,
             allow_redirects=True,
         )
         response.raise_for_status()

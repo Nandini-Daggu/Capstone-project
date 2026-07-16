@@ -68,8 +68,8 @@ class AnalystAgent:
     def __init__(
         self,
         model=None,  # str model name OR a crewai.llm.LLM instance
-        verbose: bool = True,
-        max_iter: int = 12,
+        verbose: bool = False,
+        max_iter: int = 8,
         additional_tools: Optional[List[BaseTool]] = None,
     ) -> None:
         self.model = model if model is not None else settings.model_primary

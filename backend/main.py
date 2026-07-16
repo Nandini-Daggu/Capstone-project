@@ -24,7 +24,7 @@ import json
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -80,6 +80,21 @@ _executor = ThreadPoolExecutor(max_workers=4)
 
 # In-memory run status cache (augments DB)
 _run_status: Dict[str, Dict[str, Any]] = {}
+
+# Shared workflow instance — agents and cascade LLM are built once and reused
+# across all requests to eliminate the 4-12s cold-start per request.
+_workflow: Optional[IntelligenceWorkflow] = None
+
+
+def _get_workflow(on_progress: Any = None) -> IntelligenceWorkflow:
+    """Return the cached workflow instance, creating it on first call."""
+    global _workflow
+    if _workflow is None:
+        log.info("[API] Initialising workflow (first request) …")
+        _workflow = IntelligenceWorkflow()
+    # Swap the progress callback for this request without rebuilding agents
+    _workflow._on_progress = on_progress or (lambda msg, pct: None)
+    return _workflow
 
 
 # ── Startup / Shutdown ────────────────────────────────────────────────────────
@@ -199,7 +214,7 @@ async def _run_workflow(
     def _run() -> None:
         try:
             _run_status[run_id]["status"] = RunStatus.RUNNING.value
-            workflow = IntelligenceWorkflow(on_progress=_progress_callback)
+            workflow = _get_workflow(on_progress=_progress_callback)
             result = workflow.run(
                 industry=industry,
                 competitors=competitors,
