@@ -325,11 +325,29 @@ jobs:
             -e OPENROUTER_API_KEY=test-key \
             -e DATABASE_URL=sqlite:///./test.db \
             ${{ env.IMAGE_NAME }}:ci-${{ github.sha }} \
-            uvicorn backend.main:app --host 0.0.0.0 --port 8000 &
-          sleep 8
-          curl --fail --retry 3 --retry-delay 2 http://localhost:8000/health \
-            || (docker logs ci-backend-test && exit 1)
+            uvicorn backend.main:app --host 0.0.0.0 --port 8000
+          # Poll /health every 5s for up to 120s (heavy imports on cold runner)
+          echo "Waiting for backend to become healthy (up to 120s)..."
+          for i in $(seq 1 24); do
+            # Fail fast if the container has already exited (crash/import error)
+            STATUS=$(docker inspect --format='{{.State.Status}}' ci-backend-test 2>/dev/null || echo "gone")
+            if [ "$STATUS" = "exited" ] || [ "$STATUS" = "gone" ]; then
+              echo "::error::Container exited unexpectedly"
+              docker logs ci-backend-test || true
+              exit 1
+            fi
+            if curl -sf http://localhost:8000/health > /dev/null 2>&1; then
+              echo "✅ Backend healthy after $((i * 5))s"
+              docker stop ci-backend-test || true
+              exit 0
+            fi
+            echo "  [${i}/24] Not ready yet, waiting 5s..."
+            sleep 5
+          done
+          echo "::error::Backend did not become healthy within 120s"
+          docker logs ci-backend-test || true
           docker stop ci-backend-test || true
+          exit 1
 
       - name: Log in to GitHub Container Registry
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
