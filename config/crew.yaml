@@ -1,0 +1,51 @@
+# ============================================================
+# config/crew.yaml
+# Crew-level configuration
+# ============================================================
+
+crew:
+  name: "Competitive Intelligence Briefing Crew"
+  description: >
+    A multi-agent AI crew that automates weekly competitive intelligence
+    briefings for strategy teams. Replaces manual research with a governed,
+    audited, citation-enforced AI pipeline.
+  process: sequential        # sequential | hierarchical
+  verbose: 2
+  memory: true
+  embedder:
+    provider: huggingface
+    config:
+      model: all-MiniLM-L6-v2
+  max_rpm: 10               # Max requests per minute (cost guard)
+
+governance:
+  max_sources: 15
+  max_steps: 25
+  max_runtime_seconds: 300
+  max_cost_usd: 0.02
+  require_citations: true
+  reject_uncited_claims: true
+  prompt_injection_guard: true
+  misinformation_guard: true
+
+output:
+  format: markdown
+  sections:
+    - executive_summary
+    - competitor_pricing
+    - product_updates
+    - market_signals
+    - industry_trends
+    - swot_analysis
+    - risk_analysis
+    - opportunities
+    - recommendations
+    - references
+    - run_metadata
+    - evaluation_summary
+
+quality:
+  citation_coverage_minimum: 0.95
+  confidence_threshold: 0.6
+  hallucination_threshold: 0.1
+  answer_relevancy_minimum: 0.7

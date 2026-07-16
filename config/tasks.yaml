@@ -1,0 +1,156 @@
+# ============================================================
+# config/tasks.yaml
+# Task definitions for the Competitive Intelligence Crew
+# ============================================================
+
+research_task:
+  name: "Competitive Research"
+  description: >
+    Conduct comprehensive competitive intelligence research for the following
+    parameters:
+      - Industry: {industry}
+      - Target Competitors: {competitors}
+      - Region: {region}
+      - Time Period: {time_period}
+
+    For each competitor, collect:
+      1. Recent news articles (last {time_period})
+      2. Pricing changes or announcements
+      3. New product/feature launches
+      4. Funding rounds or financial news
+      5. Acquisitions or partnerships
+      6. Executive leadership changes
+      7. Market positioning statements
+      8. Customer reviews or sentiment signals
+
+    Requirements:
+      - Collect from at least 3 sources per competitor
+      - Maximum {max_sources} total sources
+      - Every item must include: URL, publication date, source name, snippet
+      - Do NOT fabricate any data
+      - Skip unreachable sources gracefully and continue
+      - Stop at {max_steps} total tool calls
+  expected_output: >
+    A structured JSON object containing:
+    {
+      "research_data": [
+        {
+          "competitor": "string",
+          "category": "news|pricing|product|funding|acquisition|executive|sentiment",
+          "title": "string",
+          "summary": "string",
+          "source_url": "string",
+          "source_name": "string",
+          "published_date": "YYYY-MM-DD",
+          "snippet": "string",
+          "confidence": 0.0-1.0
+        }
+      ],
+      "sources_used": 0,
+      "steps_used": 0,
+      "search_queries": ["string"],
+      "failed_sources": ["string"],
+      "metadata": {}
+    }
+
+rag_retrieval_task:
+  name: "RAG Knowledge Base Retrieval"
+  description: >
+    Search the internal knowledge base (FAISS vector store) for relevant
+    historical context about the target competitors and industry:
+      - Industry: {industry}
+      - Competitors: {competitors}
+
+    Retrieve the most relevant document chunks to supplement live research.
+    Return citations with document metadata.
+  expected_output: >
+    A list of retrieved document chunks with metadata and relevance scores.
+
+analysis_task:
+  name: "Competitive Analysis"
+  description: >
+    Analyse the research data provided by the Research Agent. Produce:
+
+    1. COMPETITOR COMPARISON TABLE
+       - Compare all competitors on: pricing, product features, market share,
+         growth signals, funding status, technology stack (if known)
+
+    2. SWOT ANALYSIS
+       - For the primary competitor and relative to market
+
+    3. MARKET TREND IDENTIFICATION
+       - Extract 5-10 key market trends supported by multiple sources
+
+    4. RISK ANALYSIS
+       - Identify competitive risks to the company's position
+
+    5. OPPORTUNITY MAPPING
+       - Identify market gaps or competitor weaknesses as opportunities
+
+    6. FACT VERIFICATION
+       - Flag any claim that appears in only one source as LOW CONFIDENCE
+       - Reject any claim with no citation — do not include it in output
+       - Cross-reference contradictory claims
+
+    Input: {research_output}
+  expected_output: >
+    A structured analysis document including:
+    - Competitor comparison matrix (Markdown table)
+    - SWOT analysis (4-quadrant)
+    - Trend list with citations
+    - Risk register
+    - Opportunity map
+    - Verification report (claims checked, rejected, confidence scores)
+    - All facts tagged with citation references [1], [2]…
+
+writing_task:
+  name: "Executive Briefing Writing"
+  description: >
+    Write a complete executive intelligence briefing based on the analysis.
+    Follow the McKinsey/BCG/Gartner consulting report standard.
+
+    The briefing MUST contain these sections in order:
+    1. EXECUTIVE SUMMARY (250-300 words, board-ready)
+    2. COMPETITOR PRICING ANALYSIS (table + narrative)
+    3. PRODUCT & FEATURE UPDATES (by competitor)
+    4. MARKET SIGNALS (data-backed observations)
+    5. INDUSTRY TRENDS (5-10 named trends)
+    6. SWOT ANALYSIS (formatted grid)
+    7. RISK ANALYSIS (ranked by severity)
+    8. OPPORTUNITIES (ranked by impact)
+    9. STRATEGIC RECOMMENDATIONS (3-5 actionable items)
+    10. REFERENCES (numbered bibliography)
+    11. RUN METADATA (sources, steps, cost, duration)
+    12. EVALUATION SUMMARY (quality scores)
+
+    Citation rules:
+    - Every factual claim must end with [n] referencing the bibliography
+    - The References section must list every source used
+    - Never include a claim without a citation
+
+    Input: {analysis_output}
+    Report parameters: Industry={industry}, Period={time_period}
+  expected_output: >
+    A complete Markdown-formatted professional briefing document meeting all
+    quality standards, with numbered citations throughout and a full reference
+    list at the end.
+
+human_review_task:
+  name: "Human Review Gate"
+  description: >
+    Present the draft briefing for human review before finalisation.
+    Display:
+    - Executive Summary
+    - Key Findings (top 5)
+    - Source List
+    - Confidence Score
+    - Any LOW CONFIDENCE or flagged items
+
+    The reviewer can:
+    - APPROVE: proceed to export
+    - REJECT: return to research/writing with feedback
+    - EDIT: modify specific sections
+
+    Input: {draft_briefing}
+  expected_output: >
+    A review decision object: {approved: bool, feedback: str, edited_content: str|null}
