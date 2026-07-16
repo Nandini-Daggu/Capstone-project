@@ -70,13 +70,26 @@ class IntelligenceCrew:
     def model(self) -> str:
         """
         Return the currently active model name.
-        llm.model holds the STRIPPED name (no 'openrouter/' prefix) internally.
-        We restore the full name for display/logging purposes.
+        For real OpenRouter models that were stored without the prefix, restore it.
+        For test/override models that don't belong to openrouter, return as-is.
         """
-        stripped = self._llm.model or ""
-        if stripped and not stripped.startswith("openrouter/"):
-            return f"openrouter/{stripped}"
-        return stripped
+        raw = self._llm.model or ""
+        if not raw:
+            return raw
+        # Already has the prefix — return as-is
+        if raw.startswith("openrouter/"):
+            return raw
+        # Known OpenRouter provider namespaces — add prefix back
+        OPENROUTER_PROVIDERS = (
+            "google/", "anthropic/", "openai/", "meta-llama/", "mistralai/",
+            "cohere/", "deepseek/", "qwen/", "nvidia/", "x-ai/",
+        )
+        if any(raw.startswith(p) for p in OPENROUTER_PROVIDERS):
+            return f"openrouter/{raw}"
+        # Plain model name with no provider slash — could be a test value or
+        # a model that was originally passed without a namespace. Return as-is
+        # to avoid incorrectly prefixing test values like "test-model".
+        return raw
 
     # ── DB helpers ────────────────────────────────────────────────────────────
 

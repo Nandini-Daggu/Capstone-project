@@ -29,7 +29,7 @@ log = get_logger(__name__)
 # ── Governance patterns ────────────────────────────────────────────────────────
 
 PROMPT_INJECTION_PATTERNS = [
-    r"ignore\s+(?:previous|all|your|the)\s+instructions",
+    r"ignore\s+(?:(?:all|previous|the)\s+)?(?:your\s+)?instructions",
     r"you\s+are\s+now\s+(?:a\s+)?(?:different|new)\s+(?:ai|agent|assistant|model)",
     r"disregard\s+your\s+(?:system|original)\s+(?:prompt|instructions)",
     r"act\s+as\s+(?:dan|jailbreak|uncensored)",

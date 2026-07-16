@@ -215,7 +215,11 @@ class TestStatusEndpoint:
 
     @pytest.mark.asyncio
     async def test_status_unknown_run_id_returns_404(self, client):
-        with patch("backend.main._run_status", {}):
+        with (
+            patch("backend.main._run_status", {}),
+            patch("backend.main.db_manager") as mock_db,
+        ):
+            mock_db.get_run.return_value = None
             resp = await client.get("/status/nonexistent-run-id")
 
         assert resp.status_code == 404
@@ -255,13 +259,18 @@ class TestReportEndpoint:
     async def test_report_completed_run(self, client, sample_briefing):
         run_id = str(uuid.uuid4())
         fake_status = _make_run_status(run_id, status="completed")
-        fake_report = {
-            "run_id": run_id,
-            "industry": "SaaS",
-            "competitors": ["Salesforce"],
-            "markdown": sample_briefing,
-            "status": "completed",
-        }
+
+        # Build a mock that behaves like an ORM row (attribute access)
+        fake_report = MagicMock()
+        fake_report.run_id = run_id
+        fake_report.title = "Competitive Intelligence Briefing: SaaS"
+        fake_report.industry = "SaaS"
+        fake_report.competitors = '["Salesforce"]'
+        fake_report.full_markdown = sample_briefing
+        fake_report.sources_json = "[]"
+        fake_report.evaluation_json = None
+        fake_report.approved = True
+        fake_report.created_at = "2026-01-01T00:00:00Z"
 
         with (
             patch("backend.main._run_status", {run_id: fake_status}),
@@ -282,8 +291,12 @@ class TestMetricsEndpoint:
 
     @pytest.mark.asyncio
     async def test_metrics_returns_200(self, client):
-        with patch("backend.main.db_manager") as mock_db:
+        with (
+            patch("backend.main.db_manager") as mock_db,
+            patch("backend.main.cache_manager") as mock_cache,
+        ):
             mock_db.get_metrics_summary.return_value = _make_metrics()
+            mock_cache.get_stats.return_value = {"hit_rate": 0.8}
 
             resp = await client.get("/metrics")
 
@@ -291,8 +304,12 @@ class TestMetricsEndpoint:
 
     @pytest.mark.asyncio
     async def test_metrics_response_shape(self, client):
-        with patch("backend.main.db_manager") as mock_db:
+        with (
+            patch("backend.main.db_manager") as mock_db,
+            patch("backend.main.cache_manager") as mock_cache,
+        ):
             mock_db.get_metrics_summary.return_value = _make_metrics()
+            mock_cache.get_stats.return_value = {"hit_rate": 0.8}
 
             resp = await client.get("/metrics")
 
@@ -319,10 +336,19 @@ class TestHistoryEndpoint:
     @pytest.mark.asyncio
     async def test_history_returns_list(self, client):
         run_id = str(uuid.uuid4())
-        fake_runs = [{"run_id": run_id, "industry": "SaaS", "status": "completed"}]
+        # Build a mock that behaves like an ORM row (attribute access)
+        fake_run = MagicMock()
+        fake_run.run_id = run_id
+        fake_run.status = "completed"
+        fake_run.industry = "SaaS"
+        fake_run.competitors = '["Salesforce"]'
+        fake_run.started_at = None
+        fake_run.duration_seconds = 42.0
+        fake_run.sources_used = 5
+        fake_run.estimated_cost_usd = 0.001
 
         with patch("backend.main.db_manager") as mock_db:
-            mock_db.list_runs.return_value = fake_runs
+            mock_db.list_runs.return_value = [fake_run]
 
             resp = await client.get("/history")
 
@@ -433,6 +459,12 @@ class TestExportEndpoint:
             "format": "markdown",
         }
 
+        # Build a mock that behaves like an ORM row (attribute access)
+        fake_report = MagicMock()
+        fake_report.run_id = run_id
+        fake_report.full_markdown = sample_briefing
+        fake_report.sources_json = "[]"
+
         with (
             patch(
                 "backend.main._run_status",
@@ -445,10 +477,7 @@ class TestExportEndpoint:
             ),
             patch("backend.main.db_manager") as mock_db,
         ):
-            mock_db.get_report.return_value = {
-                "run_id": run_id,
-                "markdown": sample_briefing,
-            }
+            mock_db.get_report.return_value = fake_report
             resp = await client.post("/export", json=payload)
 
         assert resp.status_code in (200, 404, 422)

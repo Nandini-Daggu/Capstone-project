@@ -226,6 +226,43 @@ class IntelligenceWorkflow:
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 
+    async def run_async(
+        self,
+        industry: str,
+        competitors: List[str],
+        region: str = "Global",
+        time_period: str = "last 7 days",
+        max_sources: int = 15,
+        max_steps: int = 25,
+        export_formats: Optional[List[str]] = None,
+        human_review_callback: Optional[Callable[[str], HumanReviewDecision]] = None,
+        run_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Async wrapper around run(). Executes the synchronous workflow in a
+        thread pool so it does not block the event loop.
+
+        Returns a dict with at minimum ``run_id`` and ``status`` keys.
+        """
+        import asyncio
+
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(
+            None,
+            lambda: self._crew.run(
+                industry=industry,
+                competitors=competitors,
+                region=region,
+                time_period=time_period,
+                max_sources=max_sources,
+                max_steps=max_steps,
+                run_id=run_id,
+            ),
+        )
+        return result
+
+    # ── Internal helpers ──────────────────────────────────────────────────────
+
     def _run_with_timeout(self, func: Callable, timeout: int) -> Any:
         """Run a function with a wall-clock timeout."""
         with ThreadPoolExecutor(max_workers=1) as executor:

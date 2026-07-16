@@ -207,19 +207,22 @@ class TestSupervisorAgentFactory:
         assert "Supervisor" in call_kwargs.get("role", "")
         assert agent is mock_agent
 
+    @patch("src.agents.supervisor.Task")
     @patch("src.agents.supervisor.Agent")
-    def test_create_supervision_task(self, mock_agent_cls):
+    def test_create_supervision_task(self, mock_agent_cls, mock_task_cls):
         """create_supervision_task should return a Task with the correct description."""
-        from crewai import Task
-
         from src.agents.supervisor import SupervisorAgent
 
         mock_agent_cls.return_value = MagicMock()
 
+        # Make the mock Task capture kwargs so we can assert on description
+        task_instance = MagicMock()
+        mock_task_cls.return_value = task_instance
+
         sup = SupervisorAgent(model="test-model", verbose=False)
         sup.build()
 
-        task = sup.create_supervision_task(
+        result = sup.create_supervision_task(
             industry="SaaS CRM",
             competitors=["Salesforce", "HubSpot"],
             region="North America",
@@ -227,10 +230,12 @@ class TestSupervisorAgentFactory:
             run_id="sup-task-001",
         )
 
-        assert isinstance(task, Task)
-        assert "Salesforce" in task.description
-        assert "HubSpot" in task.description
-        assert "sup-task-001" in task.description
+        mock_task_cls.assert_called_once()
+        call_kwargs = mock_task_cls.call_args.kwargs
+        assert "Salesforce" in call_kwargs.get("description", "")
+        assert "HubSpot" in call_kwargs.get("description", "")
+        assert "sup-task-001" in call_kwargs.get("description", "")
+        assert result is task_instance
 
     def test_validate_request_clean(self):
         from src.agents.supervisor import SupervisorAgent
@@ -316,17 +321,19 @@ class TestResearchAgentFactory:
         assert len(call_kwargs.get("tools", [])) >= 5
         assert call_kwargs.get("allow_delegation") is False
 
+    @patch("src.agents.research_agent.Task")
     @patch("src.agents.research_agent.Agent")
-    def test_create_research_task_contains_competitors(self, mock_agent_cls):
-        from crewai import Task
-
+    def test_create_research_task_contains_competitors(self, mock_agent_cls, mock_task_cls):
         from src.agents.research_agent import ResearchAgent
 
         mock_agent_cls.return_value = MagicMock()
+        task_instance = MagicMock()
+        mock_task_cls.return_value = task_instance
+
         factory = ResearchAgent(model="test-model", verbose=False)
         factory.build()
 
-        task = factory.create_research_task(
+        result = factory.create_research_task(
             industry="FinTech",
             competitors=["Stripe", "Braintree"],
             region="Europe",
@@ -334,30 +341,36 @@ class TestResearchAgentFactory:
             run_id="res-001",
         )
 
-        assert isinstance(task, Task)
-        assert "Stripe" in task.description
-        assert "Braintree" in task.description
-        assert "FinTech" in task.description
-        assert "res-001" in task.description
+        mock_task_cls.assert_called_once()
+        call_kwargs = mock_task_cls.call_args.kwargs
+        assert "Stripe" in call_kwargs.get("description", "")
+        assert "Braintree" in call_kwargs.get("description", "")
+        assert "FinTech" in call_kwargs.get("description", "")
+        assert "res-001" in call_kwargs.get("description", "")
+        assert result is task_instance
 
+    @patch("src.agents.research_agent.Task")
     @patch("src.agents.research_agent.Agent")
-    def test_create_research_task_single_competitor(self, mock_agent_cls):
-        from crewai import Task
-
+    def test_create_research_task_single_competitor(self, mock_agent_cls, mock_task_cls):
         from src.agents.research_agent import ResearchAgent
 
         mock_agent_cls.return_value = MagicMock()
+        task_instance = MagicMock()
+        mock_task_cls.return_value = task_instance
+
         factory = ResearchAgent(model="test-model", verbose=False)
         factory.build()
 
-        task = factory.create_research_task(
+        result = factory.create_research_task(
             industry="E-Commerce",
             competitors=["Shopify"],
             region="Global",
             time_period="last 7 days",
             run_id="res-002",
         )
-        assert "Shopify" in task.description
+
+        call_kwargs = mock_task_cls.call_args.kwargs
+        assert "Shopify" in call_kwargs.get("description", "")
 
     @patch("src.agents.research_agent.Agent")
     def test_additional_tools_appended(self, mock_agent_cls):
@@ -416,47 +429,56 @@ class TestAnalystAgentFactory:
         # CitationTool should be in the toolset
         assert any("Citation" in n or "citation" in n.lower() for n in tool_names)
 
+    @patch("src.agents.analyst_agent.Task")
     @patch("src.agents.analyst_agent.Agent")
-    def test_create_analysis_task(self, mock_agent_cls):
-        from crewai import Task
-
+    def test_create_analysis_task(self, mock_agent_cls, mock_task_cls):
         from src.agents.analyst_agent import AnalystAgent
 
         mock_agent_cls.return_value = MagicMock()
+        task_instance = MagicMock()
+        mock_task_cls.return_value = task_instance
+
         factory = AnalystAgent(model="test-model", verbose=False)
         factory.build()
 
-        task = factory.create_analysis_task(
+        result = factory.create_analysis_task(
             research_output="Salesforce posted 11% growth [1]. HubSpot launched AI CRM [2].",
             industry="SaaS CRM",
             competitors=["Salesforce", "HubSpot"],
             run_id="analysis-001",
         )
 
-        assert isinstance(task, Task)
-        assert "Salesforce" in task.description
-        assert "SaaS CRM" in task.description
-        assert "analysis-001" in task.description
+        mock_task_cls.assert_called_once()
+        call_kwargs = mock_task_cls.call_args.kwargs
+        assert "Salesforce" in call_kwargs.get("description", "")
+        assert "SaaS CRM" in call_kwargs.get("description", "")
+        assert "analysis-001" in call_kwargs.get("description", "")
+        assert result is task_instance
 
+    @patch("src.agents.analyst_agent.Task")
     @patch("src.agents.analyst_agent.Agent")
-    def test_research_output_truncated_in_task(self, mock_agent_cls):
+    def test_research_output_truncated_in_task(self, mock_agent_cls, mock_task_cls):
         """Long research outputs should be truncated to avoid hitting context limits."""
         from src.agents.analyst_agent import AnalystAgent
 
         mock_agent_cls.return_value = MagicMock()
+        mock_task_cls.return_value = MagicMock()
+
         factory = AnalystAgent(model="test-model", verbose=False)
         factory.build()
 
         # 20k character research output
         long_research = "A" * 20_000
-        task = factory.create_analysis_task(
+        factory.create_analysis_task(
             research_output=long_research,
             industry="Test",
             competitors=["Co1"],
             run_id="analysis-002",
         )
+
         # Task description should not include the full 20k chars
-        assert len(task.description) < 20_000
+        call_kwargs = mock_task_cls.call_args.kwargs
+        assert len(call_kwargs.get("description", "")) < 20_000
 
     @patch("src.agents.analyst_agent.Agent")
     def test_convenience_factory(self, mock_agent_cls):
@@ -500,22 +522,24 @@ class TestWriterAgentFactory:
         call_kwargs = mock_agent_cls.call_args.kwargs
         assert len(call_kwargs.get("tools", [])) >= 1
 
+    @patch("src.agents.writer_agent.Task")
     @patch("src.agents.writer_agent.Agent")
-    def test_create_writing_task(self, mock_agent_cls):
+    def test_create_writing_task(self, mock_agent_cls, mock_task_cls):
         """
         WriterAgent.create_writing_task signature:
             analysis_output, industry, competitors, region, time_period, run_id
         Note: no research_output param — it gets analysis data directly.
         """
-        from crewai import Task
-
         from src.agents.writer_agent import WriterAgent
 
         mock_agent_cls.return_value = MagicMock()
+        task_instance = MagicMock()
+        mock_task_cls.return_value = task_instance
+
         factory = WriterAgent(model="test-model", verbose=False)
         factory.build()
 
-        task = factory.create_writing_task(
+        result = factory.create_writing_task(
             analysis_output="SWOT complete. Trends identified.",
             industry="SaaS",
             competitors=["Salesforce"],
@@ -524,8 +548,11 @@ class TestWriterAgentFactory:
             run_id="write-001",
         )
 
-        assert isinstance(task, Task)
-        assert "SaaS" in task.description or "write-001" in task.description
+        mock_task_cls.assert_called_once()
+        call_kwargs = mock_task_cls.call_args.kwargs
+        desc = call_kwargs.get("description", "")
+        assert "SaaS" in desc or "write-001" in desc
+        assert result is task_instance
 
     @patch("src.agents.writer_agent.Agent")
     def test_convenience_factory(self, mock_agent_cls):

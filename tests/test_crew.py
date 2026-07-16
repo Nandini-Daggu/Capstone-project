@@ -120,6 +120,11 @@ class TestIntelligenceCrewRun:
     @patch("crew.crew.db_manager")
     @patch("crew.crew.obs_tracker")
     @patch("crew.crew.audit_logger")
+    @patch("src.agents.writer_agent.Task")
+    @patch("src.agents.analyst_agent.Task")
+    @patch("src.agents.supervisor.Task")
+    @patch("src.agents.research_agent.Task")
+    @patch("crew.crew.Task")
     @patch("crew.crew.Crew")
     @patch("src.agents.supervisor.Agent")
     @patch("src.agents.writer_agent.Agent")
@@ -132,6 +137,11 @@ class TestIntelligenceCrewRun:
         mock_wa,
         mock_sa,
         mock_crew_cls,
+        mock_task_crew,
+        mock_task_research,
+        mock_task_supervisor,
+        mock_task_analyst,
+        mock_task_writer,
         mock_audit,
         mock_obs,
         mock_db,
@@ -139,6 +149,9 @@ class TestIntelligenceCrewRun:
     ):
         for m in (mock_ra, mock_aa, mock_wa, mock_sa):
             m.return_value = MagicMock()
+        for t in (mock_task_crew, mock_task_research, mock_task_supervisor,
+                  mock_task_analyst, mock_task_writer):
+            t.return_value = MagicMock()
 
         mock_crew_instance = MagicMock()
         mock_crew_instance.kickoff.return_value = self._build_mock_crew_result(sample_briefing)
@@ -164,6 +177,11 @@ class TestIntelligenceCrewRun:
     @patch("crew.crew.db_manager")
     @patch("crew.crew.obs_tracker")
     @patch("crew.crew.audit_logger")
+    @patch("src.agents.writer_agent.Task")
+    @patch("src.agents.analyst_agent.Task")
+    @patch("src.agents.supervisor.Task")
+    @patch("src.agents.research_agent.Task")
+    @patch("crew.crew.Task")
     @patch("crew.crew.Crew")
     @patch("src.agents.supervisor.Agent")
     @patch("src.agents.writer_agent.Agent")
@@ -176,6 +194,11 @@ class TestIntelligenceCrewRun:
         mock_wa,
         mock_sa,
         mock_crew_cls,
+        mock_task_crew,
+        mock_task_research,
+        mock_task_supervisor,
+        mock_task_analyst,
+        mock_task_writer,
         mock_audit,
         mock_obs,
         mock_db,
@@ -183,6 +206,9 @@ class TestIntelligenceCrewRun:
     ):
         for m in (mock_ra, mock_aa, mock_wa, mock_sa):
             m.return_value = MagicMock()
+        for t in (mock_task_crew, mock_task_research, mock_task_supervisor,
+                  mock_task_analyst, mock_task_writer):
+            t.return_value = MagicMock()
 
         mock_crew_instance = MagicMock()
         mock_crew_instance.kickoff.return_value = self._build_mock_crew_result(sample_briefing)
@@ -203,6 +229,11 @@ class TestIntelligenceCrewRun:
     @patch("crew.crew.db_manager")
     @patch("crew.crew.obs_tracker")
     @patch("crew.crew.audit_logger")
+    @patch("src.agents.writer_agent.Task")
+    @patch("src.agents.analyst_agent.Task")
+    @patch("src.agents.supervisor.Task")
+    @patch("src.agents.research_agent.Task")
+    @patch("crew.crew.Task")
     @patch("crew.crew.Crew")
     @patch("src.agents.supervisor.Agent")
     @patch("src.agents.writer_agent.Agent")
@@ -215,6 +246,11 @@ class TestIntelligenceCrewRun:
         mock_wa,
         mock_sa,
         mock_crew_cls,
+        mock_task_crew,
+        mock_task_research,
+        mock_task_supervisor,
+        mock_task_analyst,
+        mock_task_writer,
         mock_audit,
         mock_obs,
         mock_db,
@@ -222,6 +258,9 @@ class TestIntelligenceCrewRun:
     ):
         for m in (mock_ra, mock_aa, mock_wa, mock_sa):
             m.return_value = MagicMock()
+        for t in (mock_task_crew, mock_task_research, mock_task_supervisor,
+                  mock_task_analyst, mock_task_writer):
+            t.return_value = MagicMock()
 
         mock_crew_instance = MagicMock()
         mock_crew_instance.kickoff.return_value = self._build_mock_crew_result(sample_briefing)
@@ -243,6 +282,11 @@ class TestIntelligenceCrewRun:
     @patch("crew.crew.db_manager")
     @patch("crew.crew.obs_tracker")
     @patch("crew.crew.audit_logger")
+    @patch("src.agents.writer_agent.Task")
+    @patch("src.agents.analyst_agent.Task")
+    @patch("src.agents.supervisor.Task")
+    @patch("src.agents.research_agent.Task")
+    @patch("crew.crew.Task")
     @patch("crew.crew.Crew")
     @patch("src.agents.supervisor.Agent")
     @patch("src.agents.writer_agent.Agent")
@@ -255,12 +299,20 @@ class TestIntelligenceCrewRun:
         mock_wa,
         mock_sa,
         mock_crew_cls,
+        mock_task_crew,
+        mock_task_research,
+        mock_task_supervisor,
+        mock_task_analyst,
+        mock_task_writer,
         mock_audit,
         mock_obs,
         mock_db,
     ):
         for m in (mock_ra, mock_aa, mock_wa, mock_sa):
             m.return_value = MagicMock()
+        for t in (mock_task_crew, mock_task_research, mock_task_supervisor,
+                  mock_task_analyst, mock_task_writer):
+            t.return_value = MagicMock()
 
         mock_crew_instance = MagicMock()
         mock_crew_instance.kickoff.side_effect = RuntimeError("LLM timeout")
