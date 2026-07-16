@@ -9,7 +9,7 @@ detects uncited claims, and generates formatted reference lists.
 from __future__ import annotations
 
 import re
-from typing import Dict, List, Optional, Tuple, Type
+from typing import Dict, List, Optional, Type
 
 from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
@@ -21,17 +21,17 @@ log = get_logger(__name__)
 
 # Patterns that indicate a factual claim requiring citation
 CLAIM_PATTERNS = [
-    r"\b\d+[\.,]?\d*\s*(?:billion|million|percent|%)\b",   # Financial figures
-    r"\bracquired?\b",                                        # Acquisition claims
-    r"\braised\s+\$",                                         # Funding claims
-    r"\blaunched?\b",                                         # Launch claims
-    r"\bincreased?\s+by\b",                                   # Growth claims
-    r"\bdecreased?\s+by\b",                                   # Decline claims
-    r"\bannounced?\b",                                        # Announcement claims
-    r"\bpartnership\b",                                       # Partnership claims
-    r"\blaid\s+off\b",                                        # Layoff claims
-    r"\bfired\b|\bhired\b",                                  # HR claims
-    r"\bIPO\b|\bvaluation\b",                                # Valuation claims
+    r"\b\d+[\.,]?\d*\s*(?:billion|million|percent|%)\b",  # Financial figures
+    r"\bracquired?\b",  # Acquisition claims
+    r"\braised\s+\$",  # Funding claims
+    r"\blaunched?\b",  # Launch claims
+    r"\bincreased?\s+by\b",  # Growth claims
+    r"\bdecreased?\s+by\b",  # Decline claims
+    r"\bannounced?\b",  # Announcement claims
+    r"\bpartnership\b",  # Partnership claims
+    r"\blaid\s+off\b",  # Layoff claims
+    r"\bfired\b|\bhired\b",  # HR claims
+    r"\bIPO\b|\bvaluation\b",  # Valuation claims
 ]
 
 
@@ -220,7 +220,9 @@ class CitationTool(BaseTool):
         uncited_claims = []
 
         for sentence in sentences:
-            has_claim = any(re.search(pattern, sentence, re.IGNORECASE) for pattern in CLAIM_PATTERNS)
+            has_claim = any(
+                re.search(pattern, sentence, re.IGNORECASE) for pattern in CLAIM_PATTERNS
+            )
             has_citation = bool(re.search(r"\[\d+\]", sentence))
             if has_claim and not has_citation:
                 uncited_claims.append(sentence[:200])

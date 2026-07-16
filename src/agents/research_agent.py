@@ -21,14 +21,13 @@ from crewai import Agent, Task
 from crewai.tools import BaseTool
 
 from config.settings import settings
-from src.tools.web_search import web_search_tool
-from src.tools.news_search import news_search_tool
-from src.tools.web_scraper import web_scraper_tool
-from src.tools.market_tool import market_tool
-from src.tools.rag_tool import rag_tool
 from src.tools.cache_tool import cache_tool
+from src.tools.market_tool import market_tool
+from src.tools.news_search import news_search_tool
+from src.tools.rag_tool import rag_tool
+from src.tools.web_scraper import web_scraper_tool
+from src.tools.web_search import web_search_tool
 from src.utils.logger import get_logger
-from src.utils.observability import obs_tracker
 
 log = get_logger(__name__)
 
@@ -79,7 +78,7 @@ class ResearchAgent:
 
     def __init__(
         self,
-        model=None,          # str model name OR a crewai.llm.LLM instance
+        model=None,  # str model name OR a crewai.llm.LLM instance
         verbose: bool = True,
         max_iter: int = 15,
         additional_tools: Optional[List[BaseTool]] = None,

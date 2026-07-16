@@ -23,13 +23,12 @@ import asyncio
 import json
 import uuid
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse
 
 from config.settings import settings
 from crew.workflow import IntelligenceWorkflow
@@ -85,6 +84,7 @@ _run_status: Dict[str, Dict[str, Any]] = {}
 
 # ── Startup / Shutdown ────────────────────────────────────────────────────────
 
+
 @app.on_event("startup")
 async def startup_event() -> None:
     """Initialise resources on startup."""
@@ -101,6 +101,7 @@ async def shutdown_event() -> None:
 
 
 # ── Health ────────────────────────────────────────────────────────────────────
+
 
 @app.get("/health", response_model=HealthResponse, tags=["System"])
 async def health_check() -> HealthResponse:
@@ -125,6 +126,7 @@ async def health_check() -> HealthResponse:
 
 
 # ── Generate ──────────────────────────────────────────────────────────────────
+
 
 @app.post("/generate", response_model=BriefingResponse, tags=["Intelligence"])
 async def generate_briefing(
@@ -215,7 +217,9 @@ async def _run_workflow(
                 "error": result.error,
                 "sources_collected": result.report.metadata.sources_used if result.report else 0,
                 "steps_used": result.report.metadata.steps_used if result.report else 0,
-                "estimated_cost_usd": result.report.metadata.estimated_cost_usd if result.report else 0.0,
+                "estimated_cost_usd": (
+                    result.report.metadata.estimated_cost_usd if result.report else 0.0
+                ),
             }
         except Exception as exc:
             log.error(f"[API] Background run {run_id[:8]} failed: {exc}")
@@ -230,6 +234,7 @@ async def _run_workflow(
 
 
 # ── Status ────────────────────────────────────────────────────────────────────
+
 
 @app.get("/status/{run_id}", response_model=RunStatusResponse, tags=["Intelligence"])
 async def get_run_status(run_id: str) -> RunStatusResponse:
@@ -266,6 +271,7 @@ async def get_run_status(run_id: str) -> RunStatusResponse:
 
 # ── Report ────────────────────────────────────────────────────────────────────
 
+
 @app.get("/report/{run_id}", response_model=ReportResponse, tags=["Intelligence"])
 async def get_report(run_id: str) -> ReportResponse:
     """Retrieve the completed briefing report."""
@@ -273,7 +279,7 @@ async def get_report(run_id: str) -> ReportResponse:
     if not report:
         raise HTTPException(
             status_code=404,
-            detail=f"Report for run {run_id} not found. Run may still be in progress."
+            detail=f"Report for run {run_id} not found. Run may still be in progress.",
         )
 
     sources = []
@@ -304,6 +310,7 @@ async def get_report(run_id: str) -> ReportResponse:
 
 
 # ── Export ────────────────────────────────────────────────────────────────────
+
 
 @app.post("/export", response_model=ExportResponse, tags=["Export"])
 async def export_report(request: ExportRequest) -> ExportResponse:
@@ -374,6 +381,7 @@ async def download_export(run_id: str, format: str) -> FileResponse:
 
 # ── History ───────────────────────────────────────────────────────────────────
 
+
 @app.get("/history", tags=["Intelligence"])
 async def get_history(limit: int = Query(default=20, ge=1, le=100)) -> List[Dict]:
     """List recent briefing runs."""
@@ -394,6 +402,7 @@ async def get_history(limit: int = Query(default=20, ge=1, le=100)) -> List[Dict
 
 
 # ── Logs ──────────────────────────────────────────────────────────────────────
+
 
 @app.get("/logs/{run_id}", tags=["Observability"])
 async def get_logs(run_id: str) -> List[Dict]:
@@ -422,6 +431,7 @@ async def get_logs(run_id: str) -> List[Dict]:
 
 # ── Metrics ───────────────────────────────────────────────────────────────────
 
+
 @app.get("/metrics", response_model=MetricsResponse, tags=["Observability"])
 async def get_metrics() -> MetricsResponse:
     """Get aggregate system metrics."""
@@ -441,6 +451,7 @@ async def get_metrics() -> MetricsResponse:
 
 
 # ── Evaluate ──────────────────────────────────────────────────────────────────
+
 
 @app.get("/evaluate/{run_id}", response_model=EvaluationResponse, tags=["Evaluation"])
 async def evaluate_report(run_id: str) -> EvaluationResponse:
@@ -464,10 +475,12 @@ async def evaluate_report(run_id: str) -> EvaluationResponse:
 
     # Store evaluation in DB
     try:
-        db_manager.save_report({
-            "run_id": run_id,
-            "evaluation_json": result.model_dump_json(),
-        })
+        db_manager.save_report(
+            {
+                "run_id": run_id,
+                "evaluation_json": result.model_dump_json(),
+            }
+        )
     except Exception:
         pass
 
@@ -486,6 +499,7 @@ async def evaluate_report(run_id: str) -> EvaluationResponse:
 
 
 # ── Human Review ──────────────────────────────────────────────────────────────
+
 
 @app.post("/review/{run_id}", tags=["Review"])
 async def submit_review(
@@ -513,19 +527,21 @@ async def submit_review(
         report = db_manager.get_report(run_id)
         if report:
             import re
+
             updated_markdown = report.full_markdown or ""
             for section, content in review_request.edited_sections.items():
                 pattern = rf"(## {re.escape(section)}.*?\n)(.*?)(?=\n## |\Z)"
                 updated_markdown = re.sub(
-                    pattern, rf"\g<1>{content}\n", updated_markdown,
-                    flags=re.DOTALL | re.IGNORECASE
+                    pattern, rf"\g<1>{content}\n", updated_markdown, flags=re.DOTALL | re.IGNORECASE
                 )
-            db_manager.save_report({
-                "run_id": run_id,
-                "full_markdown": updated_markdown,
-                "approved": review_request.approved,
-                "review_json": decision.model_dump_json(),
-            })
+            db_manager.save_report(
+                {
+                    "run_id": run_id,
+                    "full_markdown": updated_markdown,
+                    "approved": review_request.approved,
+                    "review_json": decision.model_dump_json(),
+                }
+            )
 
     return {
         "run_id": run_id,
@@ -536,10 +552,12 @@ async def submit_review(
 
 # ── Traces ────────────────────────────────────────────────────────────────────
 
+
 @app.get("/traces/{run_id}", tags=["Observability"])
 async def get_trace(run_id: str) -> Dict[str, Any]:
     """Get the full execution trace for a run."""
     from src.utils.observability import obs_tracker
+
     summary = obs_tracker.get_trace_summary(run_id)
     spans = obs_tracker.get_run_spans(run_id)
 
@@ -563,6 +581,7 @@ async def get_trace(run_id: str) -> Dict[str, Any]:
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "backend.main:app",
         host=settings.api_host,

@@ -8,8 +8,6 @@ persisted to SQLite AND appended to a JSONL flat-file for offline analysis.
 
 from __future__ import annotations
 
-import json
-import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -18,6 +16,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from config.settings import settings
+
 from .logger import get_logger
 
 log = get_logger(__name__)
@@ -25,15 +24,14 @@ log = get_logger(__name__)
 
 # ── Audit record schema ───────────────────────────────────────────────────────
 
+
 class AuditRecord(BaseModel):
     """Immutable audit record written for every significant event."""
 
     record_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     run_id: str
-    timestamp: str = Field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
-    event_type: str          # tool_call | llm_call | agent_action | human_review | error
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    event_type: str  # tool_call | llm_call | agent_action | human_review | error
     agent: Optional[str] = None
     tool: Optional[str] = None
     model: Optional[str] = None
@@ -67,6 +65,7 @@ class AuditRecord(BaseModel):
 
 
 # ── Audit logger ─────────────────────────────────────────────────────────────
+
 
 class AuditLogger:
     """
@@ -211,8 +210,8 @@ class AuditLogger:
 
     def export_run_csv(self, run_id: str) -> str:
         """Export run audit records as CSV string."""
-        import io
         import csv
+        import io
 
         records = self.get_run_records(run_id)
         if not records:

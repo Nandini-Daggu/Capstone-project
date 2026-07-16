@@ -21,9 +21,9 @@ from crewai import Agent, Task
 from crewai.tools import BaseTool
 
 from config.settings import settings
+from src.tools.cache_tool import cache_tool
 from src.tools.citation_tool import citation_tool
 from src.tools.rag_tool import rag_tool
-from src.tools.cache_tool import cache_tool
 from src.utils.logger import get_logger
 
 log = get_logger(__name__)
@@ -54,7 +54,7 @@ CITATION PROTOCOL:
 
 OUTPUT STRUCTURE:
 1. Competitor Comparison Matrix (Markdown table)
-2. SWOT Analysis (4-quadrant grid)  
+2. SWOT Analysis (4-quadrant grid)
 3. Market Trends (numbered list with citations)
 4. Risk Register (by severity: HIGH/MEDIUM/LOW)
 5. Opportunity Map (by impact: HIGH/MEDIUM/LOW)
@@ -67,7 +67,7 @@ class AnalystAgent:
 
     def __init__(
         self,
-        model=None,          # str model name OR a crewai.llm.LLM instance
+        model=None,  # str model name OR a crewai.llm.LLM instance
         verbose: bool = True,
         max_iter: int = 12,
         additional_tools: Optional[List[BaseTool]] = None,

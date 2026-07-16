@@ -105,7 +105,7 @@ def _strip_prefix(model: str) -> str:
     'google/gemma-4-31b-it:free'             -> 'google/gemma-4-31b-it:free'
     """
     if model.startswith("openrouter/"):
-        return model[len("openrouter/"):]
+        return model[len("openrouter/") :]
     return model
 
 
@@ -121,6 +121,7 @@ def _ensure_prefix(model: str) -> str:
 
 
 # ── Cascade state ─────────────────────────────────────────────────────────────
+
 
 class _CascadeState:
     """
@@ -139,7 +140,7 @@ class _CascadeState:
             if normalized not in seen:
                 seen.add(normalized)
                 deduped.append(normalized)
-        self.cascade: List[str] = deduped   # full names e.g. "openrouter/google/..."
+        self.cascade: List[str] = deduped  # full names e.g. "openrouter/google/..."
         self.cooldowns: Dict[str, float] = {}
         self._permanent_failures: Set[str] = set()
         self.lock = threading.Lock()
@@ -148,8 +149,7 @@ class _CascadeState:
         with self.lock:
             self.cooldowns[full_model] = time.monotonic() + wait
         log.warning(
-            f"[Cascade] '{full_model}' rate-limited for {wait:.0f}s. "
-            "Will try next model."
+            f"[Cascade] '{full_model}' rate-limited for {wait:.0f}s. " "Will try next model."
         )
 
     def mark_permanent_failure(self, full_model: str) -> None:
@@ -157,9 +157,7 @@ class _CascadeState:
             self._permanent_failures.add(full_model)
             # Also set a very long cooldown so next_available skips it
             self.cooldowns[full_model] = time.monotonic() + 86400.0  # 24h
-        log.error(
-            f"[Cascade] '{full_model}' permanently invalid — removed from cascade."
-        )
+        log.error(f"[Cascade] '{full_model}' permanently invalid — removed from cascade.")
 
     def is_available(self, full_model: str) -> bool:
         """True if the model is not in cooldown and not permanently failed."""
@@ -205,13 +203,11 @@ class _CascadeState:
     @property
     def available_count(self) -> int:
         with self.lock:
-            return sum(
-                1 for m in self.cascade
-                if m not in self._permanent_failures
-            )
+            return sum(1 for m in self.cascade if m not in self._permanent_failures)
 
 
 # ── Factory ───────────────────────────────────────────────────────────────────
+
 
 def make_cascade_llm(cascade: Optional[List[str]] = None) -> LLM:
     """
@@ -255,7 +251,7 @@ def make_cascade_llm(cascade: Optional[List[str]] = None) -> LLM:
 
     # Normalise all names to have the openrouter/ prefix
     full_cascade = [_ensure_prefix(m) for m in raw_cascade]
-    primary_full = full_cascade[0]   # e.g. "openrouter/google/gemma-4-31b-it:free"
+    primary_full = full_cascade[0]  # e.g. "openrouter/google/gemma-4-31b-it:free"
 
     # ── Startup log ───────────────────────────────────────────
     log.info("[LLM] ===== LLM Initialisation =====")
@@ -355,7 +351,11 @@ def make_cascade_llm(cascade: Optional[List[str]] = None) -> LLM:
             log.info(f"[LLM] Calling model: '{full_model}'")
             try:
                 result = original_call(messages, **kwargs)
-                if llm.model != (full_cascade[0] if not full_cascade[0].startswith("openrouter/") else _strip_prefix(full_cascade[0])):
+                if llm.model != (
+                    full_cascade[0]
+                    if not full_cascade[0].startswith("openrouter/")
+                    else _strip_prefix(full_cascade[0])
+                ):
                     log.info(f"[LLM] ✓ Succeeded with fallback model: '{full_model}'")
                 return result
 
@@ -372,9 +372,7 @@ def make_cascade_llm(cascade: Optional[List[str]] = None) -> LLM:
 
                 elif _is_permanent_failure(exc):
                     state.mark_permanent_failure(full_model)
-                    log.warning(
-                        f"[LLM] '{full_model}' permanently failed — trying next model"
-                    )
+                    log.warning(f"[LLM] '{full_model}' permanently failed — trying next model")
                     continue
 
                 # All other errors (network issues, auth, etc.) propagate

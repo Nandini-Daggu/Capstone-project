@@ -10,12 +10,12 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-
 # ── Enums ────────────────────────────────────────────────────────────────────
+
 
 class ResearchCategory(str, Enum):
     NEWS = "news"
@@ -31,9 +31,9 @@ class ResearchCategory(str, Enum):
 
 
 class ConfidenceLevel(str, Enum):
-    HIGH = "high"       # >= 0.8
-    MEDIUM = "medium"   # 0.6 - 0.79
-    LOW = "low"         # < 0.6
+    HIGH = "high"  # >= 0.8
+    MEDIUM = "medium"  # 0.6 - 0.79
+    LOW = "low"  # < 0.6
 
 
 class ReviewDecision(str, Enum):
@@ -53,6 +53,7 @@ class RunStatus(str, Enum):
 
 
 # ── Source / Citation ─────────────────────────────────────────────────────────
+
 
 class CitedSource(BaseModel):
     """A verifiable source with full citation metadata."""
@@ -79,6 +80,7 @@ class CitedSource(BaseModel):
 
 # ── Research ──────────────────────────────────────────────────────────────────
 
+
 class ResearchItem(BaseModel):
     """A single piece of intelligence collected by the Research Agent."""
 
@@ -94,7 +96,7 @@ class ResearchItem(BaseModel):
     confidence: float = Field(default=0.8, ge=0.0, le=1.0)
     confidence_level: ConfidenceLevel = ConfidenceLevel.HIGH
     verified: bool = False
-    citation_index: Optional[int] = None   # Set by Writer after indexing
+    citation_index: Optional[int] = None  # Set by Writer after indexing
     raw_data: Optional[Dict[str, Any]] = None
 
     @model_validator(mode="after")
@@ -138,6 +140,7 @@ class ResearchOutput(BaseModel):
 
 # ── Analysis ──────────────────────────────────────────────────────────────────
 
+
 class SwotQuadrant(BaseModel):
     strengths: List[str] = Field(default_factory=list)
     weaknesses: List[str] = Field(default_factory=list)
@@ -166,7 +169,7 @@ class AnalysisOutput(BaseModel):
     market_trends: List[str] = Field(default_factory=list)
     risks: List[str] = Field(default_factory=list)
     opportunities: List[str] = Field(default_factory=list)
-    comparison_matrix: str = ""          # Markdown table
+    comparison_matrix: str = ""  # Markdown table
     verified_claims: int = 0
     rejected_claims: int = 0
     low_confidence_flags: List[str] = Field(default_factory=list)
@@ -176,6 +179,7 @@ class AnalysisOutput(BaseModel):
 
 
 # ── Evaluation ────────────────────────────────────────────────────────────────
+
 
 class EvaluationResult(BaseModel):
     """Evaluation scores from RAGAS / DeepEval / custom metrics."""
@@ -192,9 +196,7 @@ class EvaluationResult(BaseModel):
     overall_score: float = 0.0
     passed: bool = False
     notes: List[str] = Field(default_factory=list)
-    evaluated_at: str = Field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    evaluated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     @model_validator(mode="after")
     def compute_overall(self) -> "EvaluationResult":
@@ -216,6 +218,7 @@ class EvaluationResult(BaseModel):
 
 # ── Human Review ──────────────────────────────────────────────────────────────
 
+
 class HumanReviewDecision(BaseModel):
     """Decision and feedback from a human reviewer."""
 
@@ -235,6 +238,7 @@ class HumanReviewDecision(BaseModel):
 
 
 # ── Run Metadata ──────────────────────────────────────────────────────────────
+
 
 class RunMetadata(BaseModel):
     """Metadata captured for a complete crew run."""
@@ -260,14 +264,13 @@ class RunMetadata(BaseModel):
 
 # ── Briefing Report ───────────────────────────────────────────────────────────
 
+
 class BriefingReport(BaseModel):
     """The final deliverable: a complete competitive intelligence briefing."""
 
     run_id: str
     title: str = "Competitive Intelligence Briefing"
-    generated_at: str = Field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    generated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     industry: str = ""
     competitors: List[str] = Field(default_factory=list)
     region: str = ""

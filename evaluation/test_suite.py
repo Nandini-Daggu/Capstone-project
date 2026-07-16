@@ -13,9 +13,10 @@ from typing import Any, Dict, List, Optional
 
 from src.utils.logger import get_logger
 from src.utils.models import EvaluationResult
-from .ragas_eval import ragas_evaluator
+
 from .deepeval_eval import deepeval_evaluator
 from .promptfoo_eval import promptfoo_evaluator
+from .ragas_eval import ragas_evaluator
 
 log = get_logger(__name__)
 
@@ -116,8 +117,15 @@ class EvaluationManager:
         import re
 
         required = [
-            "executive summary", "pricing", "product", "market",
-            "swot", "risk", "opportunit", "recommend", "references",
+            "executive summary",
+            "pricing",
+            "product",
+            "market",
+            "swot",
+            "risk",
+            "opportunit",
+            "recommend",
+            "references",
         ]
         briefing_lower = briefing.lower()
         present = sum(1 for s in required if s in briefing_lower)

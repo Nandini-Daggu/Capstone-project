@@ -10,8 +10,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
-import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Type
 
@@ -34,6 +32,7 @@ def _get_faiss():
     global _faiss
     if _faiss is None:
         import faiss
+
         _faiss = faiss
     return _faiss
 
@@ -42,6 +41,7 @@ def _get_encoder():
     global _sentence_transformer
     if _sentence_transformer is None:
         from sentence_transformers import SentenceTransformer
+
         log.info(f"Loading embedding model: {settings.embedding_model}")
         _sentence_transformer = SentenceTransformer(
             settings.embedding_model,
@@ -51,6 +51,7 @@ def _get_encoder():
 
 
 # ── Document chunk ────────────────────────────────────────────────────────────
+
 
 class DocumentChunk(BaseModel):
     chunk_id: str
@@ -73,10 +74,11 @@ class DocumentChunk(BaseModel):
 
 # ── FAISS Vector Store ────────────────────────────────────────────────────────
 
+
 class FAISSVectorStore:
     """FAISS-backed vector store with local embeddings."""
 
-    DIMENSION = 384   # all-MiniLM-L6-v2 output dimension
+    DIMENSION = 384  # all-MiniLM-L6-v2 output dimension
 
     def __init__(self, store_path: Path) -> None:
         self._store_path = store_path
@@ -171,9 +173,7 @@ class FAISSVectorStore:
             return []
 
         encoder = _get_encoder()
-        query_vec = encoder.encode(
-            [query], normalize_embeddings=True, show_progress_bar=False
-        )
+        query_vec = encoder.encode([query], normalize_embeddings=True, show_progress_bar=False)
 
         k = min(top_k, index.ntotal)
         scores, indices = index.search(query_vec.astype(np.float32), k)
@@ -191,6 +191,7 @@ class FAISSVectorStore:
 
 
 # ── Document loader and chunker ───────────────────────────────────────────────
+
 
 class DocumentLoader:
     """Loads and chunks documents from the knowledge_base directory."""
@@ -221,6 +222,7 @@ class DocumentLoader:
             text = file_path.read_text(encoding="utf-8", errors="ignore")
         elif suffix == ".csv":
             import csv
+
             rows = []
             with open(file_path, encoding="utf-8", errors="ignore") as f:
                 reader = csv.DictReader(f)
@@ -238,9 +240,7 @@ class DocumentLoader:
 
         return self._chunk_text(text, str(file_path), file_path.name)
 
-    def _chunk_text(
-        self, text: str, source_path: str, source_name: str
-    ) -> List[DocumentChunk]:
+    def _chunk_text(self, text: str, source_path: str, source_name: str) -> List[DocumentChunk]:
         """Split text into overlapping chunks."""
         words = text.split()
         chunk_size = settings.chunk_size
@@ -274,12 +274,11 @@ class DocumentLoader:
 
 # ── RAG Tool ──────────────────────────────────────────────────────────────────
 
+
 class RAGInput(BaseModel):
     action: str = Field(
         ...,
-        description=(
-            "Action: 'search', 'index_directory', 'index_text', 'stats'"
-        ),
+        description=("Action: 'search', 'index_directory', 'index_text', 'stats'"),
     )
     query: Optional[str] = Field(None, description="Semantic search query")
     directory: Optional[str] = Field(None, description="Directory path to index")

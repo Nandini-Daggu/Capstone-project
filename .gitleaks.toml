@@ -1,0 +1,17 @@
+# .gitleaks.toml
+# Ignore known false-positive patterns (placeholder/example values, not real secrets)
+
+[allowlist]
+  description = "Ignore example placeholder values"
+  paths = [
+    ".env.example",
+    "README.md",
+  ]
+  regexes = [
+    # Placeholder API key patterns used in docs/examples
+    '''sk-or-v1-x{10,}''',
+    '''tvly-x{10,}''',
+    '''test-key-not-real''',
+    '''your-key-here''',
+    '''change-me-in-production''',
+  ]

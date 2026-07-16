@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 import time
-from pathlib import Path
 from typing import Any, Dict, Optional, Type
 
 from crewai.tools import BaseTool
@@ -28,7 +27,9 @@ class ReportExportInput(BaseModel):
         description="Export format: 'markdown', 'html', 'json'",
     )
     run_id: Optional[str] = Field(None, description="Run ID for file naming")
-    metadata: Optional[Dict[str, Any]] = Field(None, description="Additional metadata for JSON export")
+    metadata: Optional[Dict[str, Any]] = Field(
+        None, description="Additional metadata for JSON export"
+    )
 
 
 class ReportExportTool(BaseTool):
@@ -76,6 +77,7 @@ class ReportExportTool(BaseTool):
         """Convert Markdown to styled HTML."""
         try:
             import markdown as md_lib
+
             html_body = md_lib.markdown(
                 content,
                 extensions=["tables", "fenced_code", "toc"],

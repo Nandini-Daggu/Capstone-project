@@ -13,7 +13,8 @@ class TestCitationTool:
     """Tests for citation_tool.py"""
 
     def setup_method(self):
-        from src.tools.citation_tool import CitationTool, CitationRegistry
+        from src.tools.citation_tool import CitationRegistry, CitationTool
+
         self.tool = CitationTool()
         # Reset registry
         self.tool._run(action="clear")
@@ -30,7 +31,9 @@ class TestCitationTool:
 
     def test_add_duplicate_source_returns_same_index(self):
         self.tool._run(action="add_source", url="https://example.com/a", title="A", source_name="S")
-        result2 = self.tool._run(action="add_source", url="https://example.com/a", title="A", source_name="S")
+        result2 = self.tool._run(
+            action="add_source", url="https://example.com/a", title="A", source_name="S"
+        )
         assert "[1]" in result2
 
     def test_get_citation(self):
@@ -39,7 +42,12 @@ class TestCitationTool:
         assert "[1]" in result
 
     def test_generate_references(self):
-        self.tool._run(action="add_source", url="https://salesforce.com/q3", title="Q3 Earnings", source_name="Salesforce IR")
+        self.tool._run(
+            action="add_source",
+            url="https://salesforce.com/q3",
+            title="Q3 Earnings",
+            source_name="Salesforce IR",
+        )
         refs = self.tool._run(action="generate_references")
         assert "Salesforce IR" in refs
         assert "https://salesforce.com/q3" in refs
@@ -72,6 +80,7 @@ class TestCacheManager:
 
     def setup_method(self):
         from src.utils.cache import CacheManager
+
         self.cache = CacheManager()
 
     def test_llm_cache_miss(self):
@@ -109,11 +118,13 @@ class TestRAGTool:
 
     def test_rag_tool_instantiates(self):
         from src.tools.rag_tool import RAGTool
+
         tool = RAGTool()
         assert tool is not None
 
     def test_document_loader_chunks_text(self):
         from src.tools.rag_tool import DocumentLoader
+
         loader = DocumentLoader()
         text = " ".join([f"word{i}" for i in range(600)])
         chunks = loader._chunk_text(text, "test_source", "test.txt")
@@ -124,6 +135,7 @@ class TestRAGTool:
 
     def test_document_chunk_model(self):
         from src.tools.rag_tool import DocumentChunk
+
         chunk = DocumentChunk(
             chunk_id="c1",
             document_id="d1",
@@ -140,16 +152,18 @@ class TestReportExport:
     """Tests for report_export.py"""
 
     def test_export_markdown(self, tmp_path, monkeypatch):
-        from src.tools.report_export import ReportExportTool
         from config.settings import settings
+        from src.tools.report_export import ReportExportTool
+
         monkeypatch.setattr(settings, "output_dir", tmp_path)
         tool = ReportExportTool()
         result = tool._run("# Test Report\n\nContent here.", "markdown", "test-run-123")
         assert "exported" in result.lower()
 
     def test_export_json(self, tmp_path, monkeypatch):
-        from src.tools.report_export import ReportExportTool
         from config.settings import settings
+        from src.tools.report_export import ReportExportTool
+
         monkeypatch.setattr(settings, "output_dir", tmp_path)
         tool = ReportExportTool()
         result = tool._run("# Test\n\n## Section One\n\nContent.", "json", "test-run-456")
@@ -157,6 +171,7 @@ class TestReportExport:
 
     def test_parse_sections(self):
         from src.tools.report_export import ReportExportTool
+
         tool = ReportExportTool()
         md = "# Title\n\n## Section One\n\nContent one.\n\n## Section Two\n\nContent two."
         sections = tool._parse_markdown_sections(md)

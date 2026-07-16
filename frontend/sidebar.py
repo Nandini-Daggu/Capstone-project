@@ -10,7 +10,7 @@ from typing import Any, Dict
 
 import streamlit as st
 
-from .styles import INDUSTRIES, REGIONS, TIME_PERIODS, EXPORT_FORMATS
+from .styles import EXPORT_FORMATS, INDUSTRIES, REGIONS, TIME_PERIODS
 
 
 def render_sidebar() -> Dict[str, Any]:
@@ -68,9 +68,9 @@ def render_sidebar() -> Dict[str, Any]:
         # ── Industry ─────────────────────────────────────────
         st.markdown(
             '<div style="'
-            'font-size:0.68rem;font-weight:700;letter-spacing:0.1em;'
-            'text-transform:uppercase;color:#94B8D8;'
-            'margin-top:16px;margin-bottom:4px;'
+            "font-size:0.68rem;font-weight:700;letter-spacing:0.1em;"
+            "text-transform:uppercase;color:#94B8D8;"
+            "margin-top:16px;margin-bottom:4px;"
             '">🏭 &nbsp;Industry</div>',
             unsafe_allow_html=True,
         )
@@ -94,11 +94,11 @@ def render_sidebar() -> Dict[str, Any]:
         # ── Competitors ──────────────────────────────────────
         st.markdown(
             '<div style="'
-            'font-size:0.68rem;font-weight:700;letter-spacing:0.1em;'
-            'text-transform:uppercase;color:#94B8D8;'
-            'margin-top:20px;padding-top:16px;'
-            'border-top:1px solid rgba(255,255,255,0.08);'
-            'margin-bottom:4px;'
+            "font-size:0.68rem;font-weight:700;letter-spacing:0.1em;"
+            "text-transform:uppercase;color:#94B8D8;"
+            "margin-top:20px;padding-top:16px;"
+            "border-top:1px solid rgba(255,255,255,0.08);"
+            "margin-bottom:4px;"
             '">🏢 &nbsp;Competitors</div>',
             unsafe_allow_html=True,
         )
@@ -140,15 +140,15 @@ def render_sidebar() -> Dict[str, Any]:
                 '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">'
                 + "".join(
                     f'<span style="'
-                    f'background:rgba(138,184,232,0.15);'
-                    f'border:1px solid rgba(138,184,232,0.28);'
-                    f'border-radius:20px;'
-                    f'padding:3px 10px;'
-                    f'font-size:0.68rem;'
-                    f'font-weight:600;'
-                    f'color:#8ab8e8;'
-                    f'display:inline-block;'
-                    f'white-space:nowrap;'
+                    f"background:rgba(138,184,232,0.15);"
+                    f"border:1px solid rgba(138,184,232,0.28);"
+                    f"border-radius:20px;"
+                    f"padding:3px 10px;"
+                    f"font-size:0.68rem;"
+                    f"font-weight:600;"
+                    f"color:#8ab8e8;"
+                    f"display:inline-block;"
+                    f"white-space:nowrap;"
                     f'">{c}</span>'
                     for c in competitors
                 )
@@ -165,11 +165,11 @@ def render_sidebar() -> Dict[str, Any]:
         # ── Region ───────────────────────────────────────────
         st.markdown(
             '<div style="'
-            'font-size:0.68rem;font-weight:700;letter-spacing:0.1em;'
-            'text-transform:uppercase;color:#94B8D8;'
-            'margin-top:20px;padding-top:16px;'
-            'border-top:1px solid rgba(255,255,255,0.08);'
-            'margin-bottom:4px;'
+            "font-size:0.68rem;font-weight:700;letter-spacing:0.1em;"
+            "text-transform:uppercase;color:#94B8D8;"
+            "margin-top:20px;padding-top:16px;"
+            "border-top:1px solid rgba(255,255,255,0.08);"
+            "margin-bottom:4px;"
             '">🌍 &nbsp;Region</div>',
             unsafe_allow_html=True,
         )
@@ -184,11 +184,11 @@ def render_sidebar() -> Dict[str, Any]:
         # ── Time Period ───────────────────────────────────────
         st.markdown(
             '<div style="'
-            'font-size:0.68rem;font-weight:700;letter-spacing:0.1em;'
-            'text-transform:uppercase;color:#94B8D8;'
-            'margin-top:20px;padding-top:16px;'
-            'border-top:1px solid rgba(255,255,255,0.08);'
-            'margin-bottom:4px;'
+            "font-size:0.68rem;font-weight:700;letter-spacing:0.1em;"
+            "text-transform:uppercase;color:#94B8D8;"
+            "margin-top:20px;padding-top:16px;"
+            "border-top:1px solid rgba(255,255,255,0.08);"
+            "margin-bottom:4px;"
             '">📅 &nbsp;Time Period</div>',
             unsafe_allow_html=True,
         )
@@ -203,11 +203,11 @@ def render_sidebar() -> Dict[str, Any]:
         # ── Governance Limits ─────────────────────────────────
         st.markdown(
             '<div style="'
-            'font-size:0.68rem;font-weight:700;letter-spacing:0.1em;'
-            'text-transform:uppercase;color:#94B8D8;'
-            'margin-top:20px;padding-top:16px;'
-            'border-top:1px solid rgba(255,255,255,0.08);'
-            'margin-bottom:4px;'
+            "font-size:0.68rem;font-weight:700;letter-spacing:0.1em;"
+            "text-transform:uppercase;color:#94B8D8;"
+            "margin-top:20px;padding-top:16px;"
+            "border-top:1px solid rgba(255,255,255,0.08);"
+            "margin-bottom:4px;"
             '">⚙️ &nbsp;Governance Limits</div>',
             unsafe_allow_html=True,
         )
@@ -234,11 +234,11 @@ def render_sidebar() -> Dict[str, Any]:
         # ── Export Formats ────────────────────────────────────
         st.markdown(
             '<div style="'
-            'font-size:0.68rem;font-weight:700;letter-spacing:0.1em;'
-            'text-transform:uppercase;color:#94B8D8;'
-            'margin-top:20px;padding-top:16px;'
-            'border-top:1px solid rgba(255,255,255,0.08);'
-            'margin-bottom:4px;'
+            "font-size:0.68rem;font-weight:700;letter-spacing:0.1em;"
+            "text-transform:uppercase;color:#94B8D8;"
+            "margin-top:20px;padding-top:16px;"
+            "border-top:1px solid rgba(255,255,255,0.08);"
+            "margin-bottom:4px;"
             '">📄 &nbsp;Export Formats</div>',
             unsafe_allow_html=True,
         )
@@ -255,11 +255,11 @@ def render_sidebar() -> Dict[str, Any]:
         # ── Options ───────────────────────────────────────────
         st.markdown(
             '<div style="'
-            'font-size:0.68rem;font-weight:700;letter-spacing:0.1em;'
-            'text-transform:uppercase;color:#94B8D8;'
-            'margin-top:20px;padding-top:16px;'
-            'border-top:1px solid rgba(255,255,255,0.08);'
-            'margin-bottom:4px;'
+            "font-size:0.68rem;font-weight:700;letter-spacing:0.1em;"
+            "text-transform:uppercase;color:#94B8D8;"
+            "margin-top:20px;padding-top:16px;"
+            "border-top:1px solid rgba(255,255,255,0.08);"
+            "margin-bottom:4px;"
             '">🔧 &nbsp;Options</div>',
             unsafe_allow_html=True,
         )
@@ -346,9 +346,9 @@ def render_sidebar() -> Dict[str, Any]:
         # ── Footer ────────────────────────────────────────────
         st.markdown(
             '<div style="'
-            'text-align:center;font-size:0.68rem;color:#4d8ab5;'
-            'margin-top:1rem;padding-top:0.6rem;'
-            'border-top:1px solid rgba(255,255,255,0.06);'
+            "text-align:center;font-size:0.68rem;color:#4d8ab5;"
+            "margin-top:1rem;padding-top:0.6rem;"
+            "border-top:1px solid rgba(255,255,255,0.06);"
             '">v1.0 · CrewAI · OpenRouter · FAISS</div>',
             unsafe_allow_html=True,
         )

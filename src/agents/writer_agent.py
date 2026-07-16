@@ -123,7 +123,7 @@ class WriterAgent:
 
     def __init__(
         self,
-        model=None,          # str model name OR a crewai.llm.LLM instance
+        model=None,  # str model name OR a crewai.llm.LLM instance
         verbose: bool = True,
         max_iter: int = 8,
         additional_tools: Optional[List[BaseTool]] = None,
@@ -176,6 +176,7 @@ class WriterAgent:
     ) -> Task:
         """Create the writing task."""
         import time as time_mod
+
         competitors_str = ", ".join(competitors)
         date_str = time_mod.strftime("%B %d, %Y")
 

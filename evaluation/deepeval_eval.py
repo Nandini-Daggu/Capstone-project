@@ -8,7 +8,7 @@ Tests: Hallucination, Answer Correctness, GEval, Bias, Toxicity.
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from src.utils.logger import get_logger
 from src.utils.models import EvaluationResult
@@ -33,6 +33,7 @@ class DeepEvalEvaluator:
     def _check_deepeval(self) -> bool:
         try:
             import deepeval  # noqa: F401
+
             return True
         except ImportError:
             log.warning("[DeepEval] deepeval not installed — using fallback evaluation")
@@ -63,7 +64,6 @@ class DeepEvalEvaluator:
     ) -> Tuple[float, List[str]]:
         """Run DeepEval hallucination metric."""
         try:
-            from deepeval import evaluate as de_evaluate
             from deepeval.metrics import HallucinationMetric
             from deepeval.test_case import LLMTestCase
 
@@ -190,9 +190,7 @@ class DeepEvalEvaluator:
         )
 
         # Answer correctness
-        answer_correctness = self.evaluate_answer_correctness(
-            run_id, briefing, expected_output
-        )
+        answer_correctness = self.evaluate_answer_correctness(run_id, briefing, expected_output)
 
         # Citation coverage (independent check)
         total_sentences = len([s for s in re.split(r"[.!?]", briefing) if len(s.strip()) > 20])
@@ -204,7 +202,9 @@ class DeepEvalEvaluator:
             hallucination_score=hallucination_score,
             answer_correctness=answer_correctness,
             citation_coverage=citation_coverage,
-            notes=hallucinated_claims[:5] if hallucinated_claims else ["No hallucinations detected"],
+            notes=(
+                hallucinated_claims[:5] if hallucinated_claims else ["No hallucinations detected"]
+            ),
         )
 
         log.info(

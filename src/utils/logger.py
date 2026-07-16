@@ -8,9 +8,6 @@ human-readable console output with colour coding.
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 from loguru import logger
 from rich.console import Console
 from rich.logging import RichHandler
@@ -51,7 +48,7 @@ def _configure_logger() -> None:
         rotation="50 MB",
         retention="30 days",
         level=settings.log_level,
-        serialize=True,          # Write as JSON records
+        serialize=True,  # Write as JSON records
     )
 
 

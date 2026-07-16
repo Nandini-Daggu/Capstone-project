@@ -11,13 +11,12 @@ from __future__ import annotations
 import hashlib
 import json
 import time
-from functools import lru_cache
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import diskcache
 
 from config.settings import settings
+
 from .logger import get_logger
 
 log = get_logger(__name__)
@@ -45,8 +44,8 @@ class CacheManager:
         self._search_cache: Optional[diskcache.Cache] = None
         self._embedding_cache: Optional[diskcache.Cache] = None
 
-        self._hot: Dict[str, Any] = {}       # In-memory hot tier
-        self._hot_ttl: Dict[str, float] = {} # Expiry timestamps
+        self._hot: Dict[str, Any] = {}  # In-memory hot tier
+        self._hot_ttl: Dict[str, float] = {}  # Expiry timestamps
 
         self._stats = {
             "llm_hits": 0,
@@ -82,7 +81,7 @@ class CacheManager:
         if self._embedding_cache is None and settings.embedding_cache_enabled:
             self._embedding_cache = diskcache.Cache(
                 str(settings.cache_dir / "embedding"),
-                timeout=86400 * 7,   # Embeddings expire after 7 days
+                timeout=86400 * 7,  # Embeddings expire after 7 days
             )
         return self._embedding_cache  # type: ignore[return-value]
 

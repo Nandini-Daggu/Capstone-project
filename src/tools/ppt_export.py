@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import re
 import time
-from pathlib import Path
 from typing import List, Optional, Tuple, Type
 
 from crewai.tools import BaseTool
@@ -21,9 +20,9 @@ from src.utils.logger import get_logger
 log = get_logger(__name__)
 
 # Slide colour scheme (McKinsey-inspired)
-DARK_BLUE = (22, 33, 62)    # #16213E
-MID_BLUE = (15, 52, 96)     # #0F3460
-LIGHT_BLUE = (232, 244, 253) # #E8F4FD
+DARK_BLUE = (22, 33, 62)  # #16213E
+MID_BLUE = (15, 52, 96)  # #0F3460
+LIGHT_BLUE = (232, 244, 253)  # #E8F4FD
 WHITE = (255, 255, 255)
 LIGHT_GREY = (248, 249, 250)
 TEXT_DARK = (26, 26, 46)
@@ -33,7 +32,9 @@ class PPTExportInput(BaseModel):
     markdown_content: str = Field(..., description="Markdown briefing content")
     output_filename: Optional[str] = Field(None, description="Output filename (no extension)")
     run_id: Optional[str] = Field(None, description="Run ID for file naming")
-    title: str = Field(default="Competitive Intelligence Briefing", description="Presentation title")
+    title: str = Field(
+        default="Competitive Intelligence Briefing", description="Presentation title"
+    )
     subtitle: str = Field(default="Weekly Strategic Analysis", description="Presentation subtitle")
 
 
@@ -61,9 +62,7 @@ class PPTExportTool(BaseTool):
         """Generate PPTX from Markdown briefing."""
         try:
             from pptx import Presentation
-            from pptx.util import Inches, Pt, Emu
-            from pptx.dml.color import RGBColor
-            from pptx.enum.text import PP_ALIGN
+            from pptx.util import Inches
         except ImportError:
             return "python-pptx not installed. Run: pip install python-pptx"
 
@@ -83,7 +82,9 @@ class PPTExportTool(BaseTool):
         self._add_end_slide(prs)
 
         # Save
-        filename = output_filename or (f"briefing_{run_id}" if run_id else f"briefing_{int(time.time())}")
+        filename = output_filename or (
+            f"briefing_{run_id}" if run_id else f"briefing_{int(time.time())}"
+        )
         output_path = settings.output_dir / f"{filename}.pptx"
         output_path.parent.mkdir(parents=True, exist_ok=True)
         prs.save(str(output_path))
@@ -94,10 +95,12 @@ class PPTExportTool(BaseTool):
 
     def _rgb(self, tup: Tuple[int, int, int]):
         from pptx.dml.color import RGBColor
+
         return RGBColor(*tup)
 
     def _add_cover_slide(self, prs, title: str, subtitle: str) -> None:
         from pptx.util import Inches, Pt
+
         blank_layout = prs.slide_layouts[6]  # Blank
         slide = prs.slides.add_slide(blank_layout)
 
@@ -123,6 +126,7 @@ class PPTExportTool(BaseTool):
 
         # Accent line
         from pptx.util import Inches
+
         line = slide.shapes.add_shape(1, Inches(1.5), Inches(4.0), Inches(10), Inches(0.05))
         line.fill.solid()
         line.fill.fore_color.rgb = self._rgb(MID_BLUE)
@@ -130,6 +134,7 @@ class PPTExportTool(BaseTool):
 
     def _add_content_slide(self, prs, section_title: str, content: str) -> None:
         from pptx.util import Inches, Pt
+
         blank_layout = prs.slide_layouts[6]
         slide = prs.slides.add_slide(blank_layout)
 
@@ -157,9 +162,7 @@ class PPTExportTool(BaseTool):
         if len(clean_content) > 1500:
             clean_content = clean_content[:1497] + "..."
 
-        content_box = slide.shapes.add_textbox(
-            Inches(0.3), Inches(1.3), Inches(12.73), Inches(5.8)
-        )
+        content_box = slide.shapes.add_textbox(Inches(0.3), Inches(1.3), Inches(12.73), Inches(5.8))
         tf2 = content_box.text_frame
         tf2.word_wrap = True
         p2 = tf2.paragraphs[0]
@@ -169,6 +172,7 @@ class PPTExportTool(BaseTool):
 
     def _add_end_slide(self, prs) -> None:
         from pptx.util import Inches, Pt
+
         blank_layout = prs.slide_layouts[6]
         slide = prs.slides.add_slide(blank_layout)
         self._fill_background(slide, DARK_BLUE)
@@ -182,10 +186,13 @@ class PPTExportTool(BaseTool):
 
     def _fill_background(self, slide, color: Tuple[int, int, int]) -> None:
         """Fill slide background with a solid colour."""
-        from pptx.util import Inches
+
         background = slide.shapes.add_shape(
-            1, 0, 0, slide.shapes._spTree.getparent().getparent().cxSp,
-            slide.shapes._spTree.getparent().getparent().cySp
+            1,
+            0,
+            0,
+            slide.shapes._spTree.getparent().getparent().cxSp,
+            slide.shapes._spTree.getparent().getparent().cySp,
         )
         background.fill.solid()
         background.fill.fore_color.rgb = self._rgb(color)

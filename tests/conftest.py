@@ -9,7 +9,7 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 import pytest
 
@@ -153,7 +153,8 @@ Evaluation pending.
 @pytest.fixture
 def sample_research_items() -> list:
     """Return sample research items."""
-    from src.utils.models import ResearchItem, ResearchCategory
+    from src.utils.models import ResearchCategory, ResearchItem
+
     return [
         ResearchItem(
             competitor="Salesforce",

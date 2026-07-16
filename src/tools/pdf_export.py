@@ -8,7 +8,6 @@ Uses WeasyPrint to convert Markdown → HTML → PDF with professional styling.
 from __future__ import annotations
 
 import time
-from pathlib import Path
 from typing import Optional, Type
 
 from crewai.tools import BaseTool
@@ -152,6 +151,7 @@ class PDFExportTool(BaseTool):
         """Convert Markdown to PDF and save to outputs directory."""
         try:
             import markdown as md_lib
+
             html_body = md_lib.markdown(
                 markdown_content,
                 extensions=["tables", "fenced_code", "toc", "attr_list"],
@@ -162,12 +162,15 @@ class PDFExportTool(BaseTool):
         full_html = self._build_html(html_body)
 
         # Determine output path
-        filename = output_filename or (f"briefing_{run_id}" if run_id else f"briefing_{int(time.time())}")
+        filename = output_filename or (
+            f"briefing_{run_id}" if run_id else f"briefing_{int(time.time())}"
+        )
         output_path = settings.output_dir / f"{filename}.pdf"
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         try:
-            from weasyprint import HTML, CSS
+            from weasyprint import CSS, HTML
+
             HTML(string=full_html).write_pdf(
                 str(output_path),
                 stylesheets=[CSS(string=PDF_CSS)],

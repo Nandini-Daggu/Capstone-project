@@ -12,10 +12,10 @@ from typing import Any, Dict, List, Optional
 
 import streamlit as st
 
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Public entry point
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def render_report_tabs(
     report_data: Dict[str, Any],
@@ -27,16 +27,18 @@ def render_report_tabs(
     full_md = report_data.get("full_markdown", "")
     sections = _parse_sections(full_md)
 
-    tabs = st.tabs([
-        "📄 Full Report",
-        "📋 Summary",
-        "🔬 Research",
-        "📊 Analysis",
-        "🔗 Sources",
-        "📈 Evaluation",
-        "📜 Logs",
-        "📉 Metrics",
-    ])
+    tabs = st.tabs(
+        [
+            "📄 Full Report",
+            "📋 Summary",
+            "🔬 Research",
+            "📊 Analysis",
+            "🔗 Sources",
+            "📈 Evaluation",
+            "📜 Logs",
+            "📉 Metrics",
+        ]
+    )
 
     with tabs[0]:
         _render_full_report_tab(full_md)
@@ -66,6 +68,7 @@ def render_report_tabs(
 # ─────────────────────────────────────────────────────────────────────────────
 # Shared helpers
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def _parse_sections(markdown: str) -> Dict[str, str]:
     """Split markdown by ## headings into a keyed dict."""
@@ -100,7 +103,7 @@ def _section_header(icon: str, title: str) -> None:
         f'<div class="section-header">'
         f'<span class="sh-icon">{icon}</span>'
         f'<span class="sh-title">{title}</span>'
-        f'</div>',
+        f"</div>",
         unsafe_allow_html=True,
     )
 
@@ -109,7 +112,7 @@ def _badge(text: str, color: str = "#2563EB") -> str:
     """Return an inline HTML badge span."""
     return (
         f'<span style="display:inline-block;background:{color};color:#fff;'
-        f'padding:2px 10px;border-radius:9999px;font-size:0.78rem;'
+        f"padding:2px 10px;border-radius:9999px;font-size:0.78rem;"
         f'font-weight:600;letter-spacing:0.02em;">{text}</span>'
     )
 
@@ -117,6 +120,7 @@ def _badge(text: str, color: str = "#2563EB") -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 # Tab 0 — Full Report
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def _render_full_report_tab(full_md: str) -> None:
     _section_header("📄", "Complete Briefing Report")
@@ -126,14 +130,14 @@ def _render_full_report_tab(full_md: str) -> None:
         return
 
     # ── Stat row ─────────────────────────────────────────────────────────────
-    words     = len(full_md.split())
-    secs      = len(re.findall(r"^## ", full_md, re.MULTILINE))
+    words = len(full_md.split())
+    secs = len(re.findall(r"^## ", full_md, re.MULTILINE))
     citations = len(re.findall(r"\[\d+\]", full_md))
 
     m1, m2, m3 = st.columns(3)
     m1.metric("📝 Word Count", f"{words:,}")
-    m2.metric("🗂️ Sections",   secs)
-    m3.metric("🔖 Citations",  citations)
+    m2.metric("🗂️ Sections", secs)
+    m3.metric("🔖 Citations", citations)
 
     st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
@@ -148,21 +152,22 @@ def _render_full_report_tab(full_md: str) -> None:
 # Tab 1 — Summary
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def _render_executive_summary(sections: Dict, report_data: Dict) -> None:
     _section_header("📋", "Executive Summary & Key Findings")
 
-    industry      = report_data.get("industry", "")
-    competitors   = report_data.get("competitors", [])
+    industry = report_data.get("industry", "")
+    competitors = report_data.get("competitors", [])
     sources_count = len(report_data.get("sources", []))
-    meta          = report_data.get("metadata", {})
-    duration      = meta.get("duration_seconds", 0) if meta else 0
+    meta = report_data.get("metadata", {})
+    duration = meta.get("duration_seconds", 0) if meta else 0
 
     # ── 4-metric top row ─────────────────────────────────────────────────────
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("🏭 Industry",      industry or "—")
-    c2.metric("🏢 Competitors",   len(competitors))
-    c3.metric("🔗 Sources",       sources_count)
-    c4.metric("⏱️ Duration",      f"{duration:.0f}s")
+    c1.metric("🏭 Industry", industry or "—")
+    c2.metric("🏢 Competitors", len(competitors))
+    c3.metric("🔗 Sources", sources_count)
+    c4.metric("⏱️ Duration", f"{duration:.0f}s")
 
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
@@ -180,7 +185,7 @@ def _render_executive_summary(sections: Dict, report_data: Dict) -> None:
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
     # ── Pricing + Products side-by-side ───────────────────────────────────────
-    pricing  = _get_section(sections, r"pricing")
+    pricing = _get_section(sections, r"pricing")
     products = _get_section(sections, r"product")
     if pricing or products:
         _section_header("💰", "Pricing & Products")
@@ -191,7 +196,7 @@ def _render_executive_summary(sections: Dict, report_data: Dict) -> None:
                     '<div class="section-header">'
                     '<span class="sh-icon">💰</span>'
                     '<span class="sh-title">Competitor Pricing</span>'
-                    '</div>',
+                    "</div>",
                     unsafe_allow_html=True,
                 )
                 st.markdown(pricing)
@@ -201,7 +206,7 @@ def _render_executive_summary(sections: Dict, report_data: Dict) -> None:
                     '<div class="section-header">'
                     '<span class="sh-icon">🚀</span>'
                     '<span class="sh-title">Product & Feature Updates</span>'
-                    '</div>',
+                    "</div>",
                     unsafe_allow_html=True,
                 )
                 st.markdown(products)
@@ -217,6 +222,7 @@ def _render_executive_summary(sections: Dict, report_data: Dict) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 # Tab 2 — Research
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def _render_research_tab(sections: Dict) -> None:
     _section_header("🔬", "Research Findings")
@@ -246,12 +252,13 @@ def _render_research_tab(sections: Dict) -> None:
 # Tab 3 — Analysis
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def _render_analysis_tab(sections: Dict) -> None:
     _section_header("📊", "Competitive Analysis")
 
     swot = _get_section(sections, r"swot")
     risk = _get_section(sections, r"risk")
-    opp  = _get_section(sections, r"opportunit")
+    opp = _get_section(sections, r"opportunit")
 
     # ── SWOT full width ───────────────────────────────────────────────────────
     if swot:
@@ -279,6 +286,7 @@ def _render_analysis_tab(sections: Dict) -> None:
 # Tab 4 — Sources
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def _render_sources_tab(sources: List, sections: Dict) -> None:
     _section_header("🔗", "Sources & References")
 
@@ -305,8 +313,10 @@ def _render_sources_tab(sources: List, sections: Dict) -> None:
         )
 
         filtered = [
-            s for s in sources
-            if not search_q or (
+            s
+            for s in sources
+            if not search_q
+            or (
                 search_q.lower() in str(s.get("title", "")).lower()
                 or search_q.lower() in str(s.get("url", "")).lower()
                 or search_q.lower() in str(s.get("source_name", "")).lower()
@@ -314,7 +324,7 @@ def _render_sources_tab(sources: List, sections: Dict) -> None:
         ]
 
         # Cap at 60
-        capped   = filtered[:60]
+        capped = filtered[:60]
         capped_n = len(capped)
         st.caption(
             f"Showing {capped_n} of {len(sources)}"
@@ -324,16 +334,18 @@ def _render_sources_tab(sources: List, sections: Dict) -> None:
 
         for src in capped:
             if isinstance(src, dict):
-                sid   = src.get("source_id", "?")
+                sid = src.get("source_id", "?")
                 title = src.get("title") or src.get("url", "Unknown source")
-                url   = src.get("url", "")
+                url = src.get("url", "")
                 sname = src.get("source_name", "")
-                date  = src.get("published_date", "")
-                snip  = src.get("snippet", "")
+                date = src.get("published_date", "")
+                snip = src.get("snippet", "")
 
                 meta_parts = []
-                if sname: meta_parts.append(sname)
-                if date:  meta_parts.append(date)
+                if sname:
+                    meta_parts.append(sname)
+                if date:
+                    meta_parts.append(date)
                 meta_str = " · ".join(meta_parts)
 
                 with st.expander(f"[{sid}] {title[:75]}", expanded=False):
@@ -354,6 +366,7 @@ def _render_sources_tab(sources: List, sections: Dict) -> None:
 # Tab 5 — Evaluation
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def _render_evaluation_tab(evaluation_data: Optional[Dict]) -> None:
     _section_header("📈", "Evaluation Results (RAGAS + DeepEval)")
 
@@ -362,31 +375,31 @@ def _render_evaluation_tab(evaluation_data: Optional[Dict]) -> None:
             '<div class="info-box">'
             '<div class="ib-icon">ℹ️</div>'
             '<div class="ib-text">'
-            'No evaluation run yet.<br>'
-            'Click <strong>📊 Run Evaluation</strong> above to score faithfulness, '
-            'citation coverage, and hallucination rate.'
-            '</div>'
-            '</div>',
+            "No evaluation run yet.<br>"
+            "Click <strong>📊 Run Evaluation</strong> above to score faithfulness, "
+            "citation coverage, and hallucination rate."
+            "</div>"
+            "</div>",
             unsafe_allow_html=True,
         )
         return
 
     try:
-        import plotly.graph_objects as go
         import pandas as pd
+        import plotly.graph_objects as go
     except ImportError:
         st.warning("Install plotly & pandas to see evaluation charts.")
         st.json(evaluation_data)
         return
 
-    overall  = evaluation_data.get("overall_score", 0)
+    overall = evaluation_data.get("overall_score", 0)
     hallucin = evaluation_data.get("hallucination_score", 0)
-    passed   = evaluation_data.get("passed", False)
+    passed = evaluation_data.get("passed", False)
 
     # ── 4-metric top row ─────────────────────────────────────────────────────
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("🏆 Overall Score",     f"{overall:.0%}")
-    c2.metric("🤝 Faithfulness",      f"{evaluation_data.get('faithfulness', 0):.0%}")
+    c1.metric("🏆 Overall Score", f"{overall:.0%}")
+    c2.metric("🤝 Faithfulness", f"{evaluation_data.get('faithfulness', 0):.0%}")
     c3.metric("📎 Citation Coverage", f"{evaluation_data.get('citation_coverage', 0):.0%}")
     c4.metric(
         "🧠 Hallucination",
@@ -397,23 +410,23 @@ def _render_evaluation_tab(evaluation_data: Optional[Dict]) -> None:
     st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
     # ── Passed / Failed banner ────────────────────────────────────────────────
-    result_text  = "✅  PASSED" if passed else "❌  NEEDS REVIEW"
-    result_bg    = "#dcfce7"   if passed else "#fee2e2"
-    result_color = "#15803d"   if passed else "#dc2626"
+    result_text = "✅  PASSED" if passed else "❌  NEEDS REVIEW"
+    result_bg = "#dcfce7" if passed else "#fee2e2"
+    result_color = "#15803d" if passed else "#dc2626"
     st.markdown(
         f'<div style="text-align:center;padding:0.65rem 1rem;margin:0.6rem 0 1rem 0;'
-        f'background:{result_bg};border-radius:10px;font-weight:700;font-size:1.05rem;'
+        f"background:{result_bg};border-radius:10px;font-weight:700;font-size:1.05rem;"
         f'color:{result_color};letter-spacing:0.04em;">{result_text}</div>',
         unsafe_allow_html=True,
     )
 
     # ── Radar chart (left) + Score table (right) ──────────────────────────────
     radar_metrics: Dict[str, float] = {
-        "Faithfulness":      evaluation_data.get("faithfulness", 0),
-        "Answer Relevancy":  evaluation_data.get("answer_relevancy", 0),
+        "Faithfulness": evaluation_data.get("faithfulness", 0),
+        "Answer Relevancy": evaluation_data.get("answer_relevancy", 0),
         "Context Precision": evaluation_data.get("context_precision", 0),
         "Citation Coverage": evaluation_data.get("citation_coverage", 0),
-        "Tool Accuracy":     evaluation_data.get("tool_accuracy", 0),
+        "Tool Accuracy": evaluation_data.get("tool_accuracy", 0),
     }
     cats = list(radar_metrics.keys())
     vals = list(radar_metrics.values())
@@ -422,14 +435,16 @@ def _render_evaluation_tab(evaluation_data: Optional[Dict]) -> None:
 
     with chart_col:
         _section_header("📡", "Score Radar")
-        fig = go.Figure(data=go.Scatterpolar(
-            r=vals + [vals[0]],
-            theta=cats + [cats[0]],
-            fill="toself",
-            line=dict(color="#1e3a5f", width=2),
-            fillcolor="rgba(30,58,95,0.18)",
-            name="Score",
-        ))
+        fig = go.Figure(
+            data=go.Scatterpolar(
+                r=vals + [vals[0]],
+                theta=cats + [cats[0]],
+                fill="toself",
+                line=dict(color="#1e3a5f", width=2),
+                fillcolor="rgba(30,58,95,0.18)",
+                name="Score",
+            )
+        )
         fig.update_layout(
             polar=dict(
                 radialaxis=dict(
@@ -450,10 +465,7 @@ def _render_evaluation_tab(evaluation_data: Optional[Dict]) -> None:
 
     with table_col:
         _section_header("📋", "Score Breakdown")
-        rows = [
-            (k, f"{v:.2f}", "✅" if v >= 0.7 else "⚠️")
-            for k, v in radar_metrics.items()
-        ]
+        rows = [(k, f"{v:.2f}", "✅" if v >= 0.7 else "⚠️") for k, v in radar_metrics.items()]
         rows.append(
             (
                 "Hallucination",
@@ -476,6 +488,7 @@ def _render_evaluation_tab(evaluation_data: Optional[Dict]) -> None:
 # Tab 6 — Logs
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def _render_logs_tab(audit_logs: List[Dict]) -> None:
     _section_header("📜", "Audit Logs")
 
@@ -493,9 +506,9 @@ def _render_logs_tab(audit_logs: List[Dict]) -> None:
     col_type, col_agent, col_err = st.columns([1, 1, 1])
 
     event_types = sorted({r.get("event_type", "") for r in audit_logs} - {""})
-    agent_names = sorted({r.get("agent", "")       for r in audit_logs} - {""})
+    agent_names = sorted({r.get("agent", "") for r in audit_logs} - {""})
 
-    selected_type  = col_type.selectbox(
+    selected_type = col_type.selectbox(
         "Filter by event type",
         ["All"] + event_types,
         key="log_filter_type",
@@ -512,7 +525,7 @@ def _render_logs_tab(audit_logs: List[Dict]) -> None:
     )
 
     filtered = audit_logs
-    if selected_type  != "All":
+    if selected_type != "All":
         filtered = [r for r in filtered if r.get("event_type") == selected_type]
     if selected_agent != "All":
         filtered = [r for r in filtered if r.get("agent") == selected_agent]
@@ -523,18 +536,25 @@ def _render_logs_tab(audit_logs: List[Dict]) -> None:
 
     if filtered:
         safe_cols = [
-            "timestamp", "event_type", "agent", "tool",
-            "latency_ms", "total_tokens", "estimated_cost_usd", "success",
+            "timestamp",
+            "event_type",
+            "agent",
+            "tool",
+            "latency_ms",
+            "total_tokens",
+            "estimated_cost_usd",
+            "success",
         ]
         available = [c for c in safe_cols if any(c in r for r in filtered)]
-        df_rows   = [{col: r.get(col, "") for col in available} for r in filtered]
-        df        = pd.DataFrame(df_rows)
+        df_rows = [{col: r.get(col, "") for col in available} for r in filtered]
+        df = pd.DataFrame(df_rows)
         st.dataframe(df, use_container_width=True, hide_index=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Tab 7 — Metrics
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def _render_metrics_tab(metrics: Dict) -> None:
     _section_header("📉", "System Metrics & Performance")
@@ -551,10 +571,10 @@ def _render_metrics_tab(metrics: Dict) -> None:
 
     # ── 4-metric top row ─────────────────────────────────────────────────────
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("🔁 Total Runs",   metrics.get("total_runs", 0))
+    c1.metric("🔁 Total Runs", metrics.get("total_runs", 0))
     c2.metric("✅ Success Rate", f"{metrics.get('success_rate', 0):.0%}")
     c3.metric("⏱️ Avg Duration", f"{metrics.get('avg_duration_seconds', 0):.0f}s")
-    c4.metric("💵 Total Cost",   f"${metrics.get('total_cost_usd', 0):.4f}")
+    c4.metric("💵 Total Cost", f"${metrics.get('total_cost_usd', 0):.4f}")
 
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
@@ -565,37 +585,39 @@ def _render_metrics_tab(metrics: Dict) -> None:
         hit_rate = float(cache.get("hit_rate", 0))
         st.progress(hit_rate, text=f"Overall cache hit rate: **{hit_rate:.0%}**")
         cc1, cc2, cc3, cc4 = st.columns(4)
-        cc1.metric("LLM Hits",       cache.get("llm_hits", 0))
-        cc2.metric("Search Hits",    cache.get("search_hits", 0))
+        cc1.metric("LLM Hits", cache.get("llm_hits", 0))
+        cc2.metric("Search Hits", cache.get("search_hits", 0))
         cc3.metric("Embedding Hits", cache.get("embedding_hits", 0))
-        cc4.metric("Hot Tier Size",  cache.get("hot_tier_size", 0))
+        cc4.metric("Hot Tier Size", cache.get("hot_tier_size", 0))
 
     # ── Run outcomes bar chart ────────────────────────────────────────────────
-    total   = metrics.get("total_runs", 0)
+    total = metrics.get("total_runs", 0)
     success = metrics.get("completed_runs", 0)
-    failed  = metrics.get("failed_runs", 0)
+    failed = metrics.get("failed_runs", 0)
 
     if total > 0:
         st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
         _section_header("📊", "Run Outcomes")
-        fig = go.Figure(data=[
-            go.Bar(
-                name="Completed",
-                x=["Runs"],
-                y=[success],
-                marker_color="#22c55e",
-                text=[success],
-                textposition="auto",
-            ),
-            go.Bar(
-                name="Failed",
-                x=["Runs"],
-                y=[failed],
-                marker_color="#ef4444",
-                text=[failed],
-                textposition="auto",
-            ),
-        ])
+        fig = go.Figure(
+            data=[
+                go.Bar(
+                    name="Completed",
+                    x=["Runs"],
+                    y=[success],
+                    marker_color="#22c55e",
+                    text=[success],
+                    textposition="auto",
+                ),
+                go.Bar(
+                    name="Failed",
+                    x=["Runs"],
+                    y=[failed],
+                    marker_color="#ef4444",
+                    text=[failed],
+                    textposition="auto",
+                ),
+            ]
+        )
         fig.update_layout(
             barmode="stack",
             height=220,

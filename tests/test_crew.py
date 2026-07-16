@@ -14,14 +14,14 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
 
 import pytest
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # IntelligenceCrew construction
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @pytest.mark.unit
 class TestIntelligenceCrewConstruction:
@@ -41,11 +41,16 @@ class TestIntelligenceCrewConstruction:
         mock_crew_cls,
     ):
         """IntelligenceCrew should instantiate without errors."""
-        for m in (mock_research_agent, mock_analyst_agent,
-                  mock_writer_agent, mock_supervisor_agent):
+        for m in (
+            mock_research_agent,
+            mock_analyst_agent,
+            mock_writer_agent,
+            mock_supervisor_agent,
+        ):
             m.return_value = MagicMock()
 
         from crew.crew import IntelligenceCrew
+
         crew_obj = IntelligenceCrew(model="test-model", verbose=False)
         assert crew_obj is not None
         assert crew_obj.model == "test-model"
@@ -57,13 +62,17 @@ class TestIntelligenceCrewConstruction:
     @patch("src.agents.research_agent.Agent")
     def test_default_model_from_settings(
         self,
-        mock_ra, mock_aa, mock_wa, mock_sa, mock_crew_cls,
+        mock_ra,
+        mock_aa,
+        mock_wa,
+        mock_sa,
+        mock_crew_cls,
     ):
         for m in (mock_ra, mock_aa, mock_wa, mock_sa):
             m.return_value = MagicMock()
 
-        from crew.crew import IntelligenceCrew
         from config.settings import settings
+        from crew.crew import IntelligenceCrew
 
         crew_obj = IntelligenceCrew(verbose=False)
         assert crew_obj.model == settings.model_primary
@@ -75,12 +84,17 @@ class TestIntelligenceCrewConstruction:
     @patch("src.agents.research_agent.Agent")
     def test_has_four_agent_factories(
         self,
-        mock_ra, mock_aa, mock_wa, mock_sa, mock_crew_cls,
+        mock_ra,
+        mock_aa,
+        mock_wa,
+        mock_sa,
+        mock_crew_cls,
     ):
         for m in (mock_ra, mock_aa, mock_wa, mock_sa):
             m.return_value = MagicMock()
 
         from crew.crew import IntelligenceCrew
+
         crew_obj = IntelligenceCrew(model="test-model", verbose=False)
 
         assert crew_obj._research_factory is not None
@@ -92,6 +106,7 @@ class TestIntelligenceCrewConstruction:
 # ─────────────────────────────────────────────────────────────────────────────
 # IntelligenceCrew.run() — mocked execution
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @pytest.mark.unit
 class TestIntelligenceCrewRun:
@@ -112,9 +127,14 @@ class TestIntelligenceCrewRun:
     @patch("src.agents.research_agent.Agent")
     def test_run_returns_dict_with_run_id(
         self,
-        mock_ra, mock_aa, mock_wa, mock_sa,
+        mock_ra,
+        mock_aa,
+        mock_wa,
+        mock_sa,
         mock_crew_cls,
-        mock_audit, mock_obs, mock_db,
+        mock_audit,
+        mock_obs,
+        mock_db,
         sample_briefing,
     ):
         for m in (mock_ra, mock_aa, mock_wa, mock_sa):
@@ -126,6 +146,7 @@ class TestIntelligenceCrewRun:
         mock_db.save_report = MagicMock()
 
         from crew.crew import IntelligenceCrew
+
         crew_obj = IntelligenceCrew(model="test-model", verbose=False)
 
         result = crew_obj.run(
@@ -150,8 +171,14 @@ class TestIntelligenceCrewRun:
     @patch("src.agents.research_agent.Agent")
     def test_run_status_completed_on_success(
         self,
-        mock_ra, mock_aa, mock_wa, mock_sa,
-        mock_crew_cls, mock_audit, mock_obs, mock_db,
+        mock_ra,
+        mock_aa,
+        mock_wa,
+        mock_sa,
+        mock_crew_cls,
+        mock_audit,
+        mock_obs,
+        mock_db,
         sample_briefing,
     ):
         for m in (mock_ra, mock_aa, mock_wa, mock_sa):
@@ -162,6 +189,7 @@ class TestIntelligenceCrewRun:
         mock_crew_cls.return_value = mock_crew_instance
 
         from crew.crew import IntelligenceCrew
+
         crew_obj = IntelligenceCrew(model="test-model", verbose=False)
 
         result = crew_obj.run(
@@ -182,8 +210,14 @@ class TestIntelligenceCrewRun:
     @patch("src.agents.research_agent.Agent")
     def test_run_generates_run_id_when_not_provided(
         self,
-        mock_ra, mock_aa, mock_wa, mock_sa,
-        mock_crew_cls, mock_audit, mock_obs, mock_db,
+        mock_ra,
+        mock_aa,
+        mock_wa,
+        mock_sa,
+        mock_crew_cls,
+        mock_audit,
+        mock_obs,
+        mock_db,
         sample_briefing,
     ):
         for m in (mock_ra, mock_aa, mock_wa, mock_sa):
@@ -194,6 +228,7 @@ class TestIntelligenceCrewRun:
         mock_crew_cls.return_value = mock_crew_instance
 
         from crew.crew import IntelligenceCrew
+
         crew_obj = IntelligenceCrew(model="test-model", verbose=False)
 
         result = crew_obj.run(
@@ -215,8 +250,14 @@ class TestIntelligenceCrewRun:
     @patch("src.agents.research_agent.Agent")
     def test_run_handles_crew_exception_gracefully(
         self,
-        mock_ra, mock_aa, mock_wa, mock_sa,
-        mock_crew_cls, mock_audit, mock_obs, mock_db,
+        mock_ra,
+        mock_aa,
+        mock_wa,
+        mock_sa,
+        mock_crew_cls,
+        mock_audit,
+        mock_obs,
+        mock_db,
     ):
         for m in (mock_ra, mock_aa, mock_wa, mock_sa):
             m.return_value = MagicMock()
@@ -226,6 +267,7 @@ class TestIntelligenceCrewRun:
         mock_crew_cls.return_value = mock_crew_instance
 
         from crew.crew import IntelligenceCrew
+
         crew_obj = IntelligenceCrew(model="test-model", verbose=False)
 
         result = crew_obj.run(
@@ -237,7 +279,10 @@ class TestIntelligenceCrewRun:
         # Should return a dict indicating failure, not raise
         assert isinstance(result, dict)
         assert result.get("status") in (
-            "failed", "error", "partial_failure", "completed"  # partial is acceptable
+            "failed",
+            "error",
+            "partial_failure",
+            "completed",  # partial is acceptable
         )
 
 
@@ -245,24 +290,22 @@ class TestIntelligenceCrewRun:
 # IntelligenceWorkflow
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @pytest.mark.unit
 class TestIntelligenceWorkflow:
     """Test workflow-layer logic (async wrapper around IntelligenceCrew)."""
 
     def test_workflow_instantiates(self):
-        with (
-            patch("crew.workflow.IntelligenceCrew") as mock_crew_cls,
-        ):
+        with (patch("crew.workflow.IntelligenceCrew") as mock_crew_cls,):
             mock_crew_cls.return_value = MagicMock()
             from crew.workflow import IntelligenceWorkflow
+
             wf = IntelligenceWorkflow()
             assert wf is not None
 
     @pytest.mark.asyncio
     async def test_run_async_returns_result(self, sample_briefing):
-        with (
-            patch("crew.workflow.IntelligenceCrew") as mock_crew_cls,
-        ):
+        with (patch("crew.workflow.IntelligenceCrew") as mock_crew_cls,):
             mock_crew_instance = MagicMock()
             mock_crew_instance.run.return_value = {
                 "run_id": "wf-001",
@@ -272,6 +315,7 @@ class TestIntelligenceWorkflow:
             mock_crew_cls.return_value = mock_crew_instance
 
             from crew.workflow import IntelligenceWorkflow
+
             wf = IntelligenceWorkflow()
 
             result = await wf.run_async(
@@ -287,9 +331,7 @@ class TestIntelligenceWorkflow:
 
     @pytest.mark.asyncio
     async def test_run_async_propagates_run_id(self, sample_briefing):
-        with (
-            patch("crew.workflow.IntelligenceCrew") as mock_crew_cls,
-        ):
+        with (patch("crew.workflow.IntelligenceCrew") as mock_crew_cls,):
             expected_run_id = str(uuid.uuid4())
             mock_crew_instance = MagicMock()
             mock_crew_instance.run.return_value = {
@@ -300,6 +342,7 @@ class TestIntelligenceWorkflow:
             mock_crew_cls.return_value = mock_crew_instance
 
             from crew.workflow import IntelligenceWorkflow
+
             wf = IntelligenceWorkflow()
 
             result = await wf.run_async(
@@ -312,14 +355,13 @@ class TestIntelligenceWorkflow:
 
     @pytest.mark.asyncio
     async def test_run_async_raises_or_returns_on_crew_error(self):
-        with (
-            patch("crew.workflow.IntelligenceCrew") as mock_crew_cls,
-        ):
+        with (patch("crew.workflow.IntelligenceCrew") as mock_crew_cls,):
             mock_crew_instance = MagicMock()
             mock_crew_instance.run.side_effect = RuntimeError("Crew error")
             mock_crew_cls.return_value = mock_crew_instance
 
             from crew.workflow import IntelligenceWorkflow
+
             wf = IntelligenceWorkflow()
 
             try:
@@ -339,18 +381,21 @@ class TestIntelligenceWorkflow:
 # Memory module
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @pytest.mark.unit
 class TestRunMemory:
     """Test the run memory module."""
 
     def test_get_run_memory_returns_object(self):
         from crew.memory import get_run_memory
+
         mem = get_run_memory("mem-test-001")
         assert mem is not None
 
     def test_get_run_memory_is_deterministic(self):
         """Same run_id should return an equivalent memory object."""
         from crew.memory import get_run_memory
+
         mem1 = get_run_memory("mem-test-002")
         mem2 = get_run_memory("mem-test-002")
         assert type(mem1) == type(mem2)
@@ -359,6 +404,7 @@ class TestRunMemory:
 # ─────────────────────────────────────────────────────────────────────────────
 # Retry / resilience utility
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @pytest.mark.unit
 class TestRetryUtility:
@@ -373,7 +419,7 @@ class TestRetryUtility:
     """
 
     def test_succeeds_on_first_try(self):
-        from src.utils.retry import with_retry, RetryConfig
+        from src.utils.retry import RetryConfig, with_retry
 
         call_count = 0
 
@@ -388,16 +434,18 @@ class TestRetryUtility:
         assert call_count == 1
 
     def test_retries_on_transient_error(self):
-        from src.utils.retry import with_retry, RetryConfig
+        from src.utils.retry import RetryConfig, with_retry
 
         call_count = 0
 
-        @with_retry(RetryConfig(
-            max_attempts=3,
-            wait_min_seconds=0,
-            wait_max_seconds=0,
-            timeout_seconds=None,
-        ))
+        @with_retry(
+            RetryConfig(
+                max_attempts=3,
+                wait_min_seconds=0,
+                wait_max_seconds=0,
+                timeout_seconds=None,
+            )
+        )
         def fails_twice_then_succeeds():
             nonlocal call_count
             call_count += 1
@@ -410,15 +458,17 @@ class TestRetryUtility:
         assert call_count == 3
 
     def test_raises_after_max_retries(self):
-        from src.utils.retry import with_retry, RetryConfig
+        from src.utils.retry import RetryConfig, with_retry
 
-        @with_retry(RetryConfig(
-            max_attempts=2,
-            wait_min_seconds=0,
-            wait_max_seconds=0,
-            timeout_seconds=None,
-            reraise=True,
-        ))
+        @with_retry(
+            RetryConfig(
+                max_attempts=2,
+                wait_min_seconds=0,
+                wait_max_seconds=0,
+                timeout_seconds=None,
+                reraise=True,
+            )
+        )
         def always_fails():
             raise RuntimeError("permanent failure")
 
@@ -428,6 +478,7 @@ class TestRetryUtility:
     def test_circuit_breaker_instantiates(self):
         """CircuitBreaker should instantiate without errors."""
         from src.utils.retry import CircuitBreaker
+
         cb = CircuitBreaker(name="test-service", failure_threshold=3, recovery_timeout=5.0)
         assert cb.state == CircuitBreaker.CLOSED
 
@@ -461,6 +512,7 @@ class TestRetryUtility:
 
     def test_get_circuit_breaker_singleton(self):
         from src.utils.retry import get_circuit_breaker
+
         cb1 = get_circuit_breaker("my-service")
         cb2 = get_circuit_breaker("my-service")
         assert cb1 is cb2
@@ -470,16 +522,19 @@ class TestRetryUtility:
 # Database manager
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @pytest.mark.integration
 class TestDatabaseManager:
     """Integration tests for the SQLite database manager."""
 
     def test_db_manager_instantiates(self):
         from src.utils.database import db_manager
+
         assert db_manager is not None
 
     def test_get_metrics_summary_returns_dict(self):
         from src.utils.database import db_manager
+
         try:
             result = db_manager.get_metrics_summary()
             assert isinstance(result, dict)
@@ -488,6 +543,7 @@ class TestDatabaseManager:
 
     def test_list_runs_returns_list(self):
         from src.utils.database import db_manager
+
         try:
             result = db_manager.list_runs(limit=10)
             assert isinstance(result, list)
@@ -496,6 +552,7 @@ class TestDatabaseManager:
 
     def test_get_nonexistent_report_returns_none(self):
         from src.utils.database import db_manager
+
         try:
             result = db_manager.get_report("nonexistent-run-xyz")
             assert result is None
@@ -507,13 +564,16 @@ class TestDatabaseManager:
 # Config YAML loading
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @pytest.mark.unit
 class TestConfigFiles:
     """Verify that YAML config files load correctly."""
 
     def test_agents_yaml_loads(self):
-        import yaml
         from pathlib import Path
+
+        import yaml
+
         config_path = Path(__file__).parent.parent / "config" / "agents.yaml"
         if not config_path.exists():
             pytest.skip("agents.yaml not found")
@@ -523,8 +583,10 @@ class TestConfigFiles:
         assert len(data) > 0
 
     def test_tasks_yaml_loads(self):
-        import yaml
         from pathlib import Path
+
+        import yaml
+
         config_path = Path(__file__).parent.parent / "config" / "tasks.yaml"
         if not config_path.exists():
             pytest.skip("tasks.yaml not found")
@@ -533,8 +595,10 @@ class TestConfigFiles:
         assert isinstance(data, dict)
 
     def test_crew_yaml_loads(self):
-        import yaml
         from pathlib import Path
+
+        import yaml
+
         config_path = Path(__file__).parent.parent / "config" / "crew.yaml"
         if not config_path.exists():
             pytest.skip("crew.yaml not found")

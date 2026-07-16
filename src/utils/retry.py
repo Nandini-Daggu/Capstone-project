@@ -7,21 +7,17 @@ Built on Tenacity for battle-tested retry logic.
 
 from __future__ import annotations
 
-import asyncio
 import functools
 import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional, Tuple, Type
 
 from tenacity import (
-    RetryError,
-    Retrying,
     AsyncRetrying,
+    Retrying,
     retry_if_exception_type,
     stop_after_attempt,
     wait_exponential,
-    before_sleep_log,
-    after_log,
 )
 
 from .logger import get_logger
@@ -30,6 +26,7 @@ log = get_logger(__name__)
 
 
 # ── Configuration ─────────────────────────────────────────────────────────────
+
 
 @dataclass
 class RetryConfig:
@@ -40,13 +37,12 @@ class RetryConfig:
     wait_max_seconds: float = 30.0
     wait_multiplier: float = 2.0
     timeout_seconds: Optional[float] = 60.0
-    retry_on: Tuple[Type[Exception], ...] = field(
-        default_factory=lambda: (Exception,)
-    )
+    retry_on: Tuple[Type[Exception], ...] = field(default_factory=lambda: (Exception,))
     reraise: bool = True
 
 
 # ── Sync retry decorator ──────────────────────────────────────────────────────
+
 
 def with_retry(config: Optional[RetryConfig] = None) -> Callable:
     """
@@ -64,8 +60,6 @@ def with_retry(config: Optional[RetryConfig] = None) -> Callable:
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             start = time.monotonic()
             attempt = 0
-            last_exc: Optional[Exception] = None
-
             for attempt_state in Retrying(
                 stop=stop_after_attempt(cfg.max_attempts),
                 wait=wait_exponential(
@@ -86,7 +80,6 @@ def with_retry(config: Optional[RetryConfig] = None) -> Callable:
                     try:
                         return func(*args, **kwargs)
                     except Exception as exc:
-                        last_exc = exc
                         log.warning(
                             f"[Retry] {func.__name__} attempt {attempt}/{cfg.max_attempts} "
                             f"failed: {exc}"
@@ -99,6 +92,7 @@ def with_retry(config: Optional[RetryConfig] = None) -> Callable:
 
 
 # ── Async retry decorator ─────────────────────────────────────────────────────
+
 
 def with_async_retry(config: Optional[RetryConfig] = None) -> Callable:
     """
@@ -145,6 +139,7 @@ def with_async_retry(config: Optional[RetryConfig] = None) -> Callable:
 
 # ── Circuit Breaker ───────────────────────────────────────────────────────────
 
+
 class CircuitBreaker:
     """
     Simple circuit breaker with three states: CLOSED, OPEN, HALF-OPEN.
@@ -189,9 +184,7 @@ class CircuitBreaker:
         current_state = self.state
 
         if current_state == self.OPEN:
-            raise RuntimeError(
-                f"Circuit breaker '{self.name}' is OPEN — failing fast"
-            )
+            raise RuntimeError(f"Circuit breaker '{self.name}' is OPEN — failing fast")
 
         if current_state == self.HALF_OPEN:
             if self._half_open_calls >= self.half_open_max_calls:
@@ -204,7 +197,7 @@ class CircuitBreaker:
             result = func(*args, **kwargs)
             self._on_success()
             return result
-        except Exception as exc:
+        except Exception:
             self._on_failure()
             raise
 
@@ -220,8 +213,7 @@ class CircuitBreaker:
         if self._failure_count >= self.failure_threshold:
             self._state = self.OPEN
             log.warning(
-                f"[CircuitBreaker:{self.name}] CLOSED → OPEN "
-                f"(failures={self._failure_count})"
+                f"[CircuitBreaker:{self.name}] CLOSED → OPEN " f"(failures={self._failure_count})"
             )
 
 

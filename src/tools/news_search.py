@@ -7,21 +7,18 @@ Specialised for competitor news, press releases, and market updates.
 
 from __future__ import annotations
 
-import time
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Type
+from datetime import datetime
+from typing import Dict, List, Type
 from urllib.parse import quote_plus
 
 import feedparser
-import requests
 from crewai.tools import BaseTool
 from duckduckgo_search import DDGS
 from pydantic import BaseModel, Field
 
-from config.settings import settings
 from src.utils.cache import cache_manager
 from src.utils.logger import get_logger
-from src.utils.retry import RetryConfig, get_circuit_breaker, with_retry
+from src.utils.retry import get_circuit_breaker
 
 log = get_logger(__name__)
 
@@ -107,23 +104,22 @@ class NewsSearchTool(BaseTool):
         time_filter = "w" if days_back <= 7 else ("m" if days_back <= 30 else "y")
         with DDGS() as ddgs:
             for r in ddgs.news(keywords=query, max_results=max_results, timelimit=time_filter):
-                results.append({
-                    "title": r.get("title", ""),
-                    "url": r.get("url", ""),
-                    "snippet": r.get("body", ""),
-                    "source_name": r.get("source", "DuckDuckGo News"),
-                    "published_date": r.get("date", ""),
-                    "source": "duckduckgo_news",
-                })
+                results.append(
+                    {
+                        "title": r.get("title", ""),
+                        "url": r.get("url", ""),
+                        "snippet": r.get("body", ""),
+                        "source_name": r.get("source", "DuckDuckGo News"),
+                        "published_date": r.get("date", ""),
+                        "source": "duckduckgo_news",
+                    }
+                )
         return results
 
     def _google_news_rss(self, query: str, max_results: int) -> List[Dict]:
         """Fetch news from Google News RSS feed."""
         encoded_query = quote_plus(query)
-        url = (
-            f"https://news.google.com/rss/search?q={encoded_query}"
-            f"&hl=en-US&gl=US&ceid=US:en"
-        )
+        url = f"https://news.google.com/rss/search?q={encoded_query}" f"&hl=en-US&gl=US&ceid=US:en"
         results = []
         try:
             feed = feedparser.parse(url)
@@ -137,14 +133,16 @@ class NewsSearchTool(BaseTool):
                     except Exception:
                         published = entry.published
 
-                results.append({
-                    "title": entry.get("title", ""),
-                    "url": entry.get("link", ""),
-                    "snippet": entry.get("summary", "")[:500],
-                    "source_name": entry.get("source", {}).get("title", "Google News"),
-                    "published_date": published,
-                    "source": "google_news_rss",
-                })
+                results.append(
+                    {
+                        "title": entry.get("title", ""),
+                        "url": entry.get("link", ""),
+                        "snippet": entry.get("summary", "")[:500],
+                        "source_name": entry.get("source", {}).get("title", "Google News"),
+                        "published_date": published,
+                        "source": "google_news_rss",
+                    }
+                )
         except Exception as exc:
             log.debug(f"[NewsSearch] RSS parse error: {exc}")
 

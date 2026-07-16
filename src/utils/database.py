@@ -7,27 +7,16 @@ Stores run history, audit logs, reports, and evaluation results.
 
 from __future__ import annotations
 
-import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import (
-    Boolean,
-    Column,
-    DateTime,
-    Float,
-    Integer,
-    String,
-    Text,
-    create_engine,
-    event,
-    text,
-)
+from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String, Text, create_engine, event
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from config.settings import settings
+
 from .logger import get_logger
 
 log = get_logger(__name__)
@@ -35,21 +24,24 @@ log = get_logger(__name__)
 
 # ── SQLAlchemy Base ───────────────────────────────────────────────────────────
 
+
 class Base(DeclarativeBase):
     pass
 
 
 # ── ORM Models ────────────────────────────────────────────────────────────────
 
+
 class RunRecord(Base):
     """One record per crew run."""
+
     __tablename__ = "runs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     run_id = Column(String(36), unique=True, nullable=False, index=True)
     status = Column(String(20), default="pending")
     industry = Column(String(200), default="")
-    competitors = Column(Text, default="[]")     # JSON list
+    competitors = Column(Text, default="[]")  # JSON list
     region = Column(String(100), default="")
     time_period = Column(String(100), default="")
     max_sources = Column(Integer, default=15)
@@ -68,6 +60,7 @@ class RunRecord(Base):
 
 class ReportRecord(Base):
     """Stored briefing reports."""
+
     __tablename__ = "reports"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -85,6 +78,7 @@ class ReportRecord(Base):
 
 class AuditLogRecord(Base):
     """Audit log records from the AuditLogger."""
+
     __tablename__ = "audit_logs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -112,6 +106,7 @@ class AuditLogRecord(Base):
 
 class ObservabilityRecord(Base):
     """Observability / trace records."""
+
     __tablename__ = "observability"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -128,6 +123,7 @@ class ObservabilityRecord(Base):
 
 
 # ── Database Manager ──────────────────────────────────────────────────────────
+
 
 class DatabaseManager:
     """Manages SQLite connection, schema creation, and CRUD operations."""
@@ -185,20 +181,13 @@ class DatabaseManager:
 
     def list_runs(self, limit: int = 20) -> List[RunRecord]:
         with self.get_session() as session:
-            return (
-                session.query(RunRecord)
-                .order_by(RunRecord.created_at.desc())
-                .limit(limit)
-                .all()
-            )
+            return session.query(RunRecord).order_by(RunRecord.created_at.desc()).limit(limit).all()
 
     # ── Report CRUD ───────────────────────────────────────────
 
     def save_report(self, report_data: Dict[str, Any]) -> ReportRecord:
         with self.get_session() as session:
-            existing = session.query(ReportRecord).filter_by(
-                run_id=report_data["run_id"]
-            ).first()
+            existing = session.query(ReportRecord).filter_by(run_id=report_data["run_id"]).first()
             if existing:
                 for k, v in report_data.items():
                     setattr(existing, k, v)

@@ -15,6 +15,7 @@ class TestDeepEvalFallback:
 
     def setup_method(self):
         from evaluation.deepeval_eval import DeepEvalEvaluator
+
         self.evaluator = DeepEvalEvaluator()
         self.evaluator._deepeval_available = False  # Force fallback
 
@@ -56,6 +57,7 @@ class TestRagasFallback:
 
     def setup_method(self):
         from evaluation.ragas_eval import RagasEvaluator
+
         self.evaluator = RagasEvaluator()
         self.evaluator._ragas_available = False  # Force fallback
 
@@ -85,6 +87,7 @@ class TestPromptfooScenarios:
 
     def setup_method(self):
         from evaluation.promptfoo_eval import PromptfooEvaluator
+
         self.evaluator = PromptfooEvaluator()
 
     def test_scenario_1_complete_briefing_passes(self, sample_briefing):
@@ -122,31 +125,30 @@ class TestPromptfooScenarios:
         # Output that does NOT include the false claim
         result = self.evaluator.evaluate_output(test_case, sample_briefing, {})
         # Should pass because sample_briefing doesn't say OpenAI acquired Anthropic
-        passed_expected = all(
-            "false acquisition claim" not in a
-            for a in result.failed_assertions
-        )
+        passed_expected = all("false acquisition claim" not in a for a in result.failed_assertions)
         assert passed_expected
 
     def test_generate_report(self, sample_briefing):
         test_case = self.evaluator._test_cases[0]
-        result = self.evaluator.evaluate_output(test_case, sample_briefing, {
-            "competitors": ["Salesforce", "HubSpot", "Pipedrive"]
-        })
+        result = self.evaluator.evaluate_output(
+            test_case, sample_briefing, {"competitors": ["Salesforce", "HubSpot", "Pipedrive"]}
+        )
         summary = {
             "total_tests": 1,
             "passed": int(result.passed),
             "failed": int(not result.passed),
             "pass_rate": float(result.passed),
             "average_score": result.score,
-            "results": [{
-                "name": result.test_name,
-                "scenario": result.scenario,
-                "passed": result.passed,
-                "score": result.score,
-                "failed_assertions": result.failed_assertions,
-                "duration_seconds": result.duration_seconds,
-            }],
+            "results": [
+                {
+                    "name": result.test_name,
+                    "scenario": result.scenario,
+                    "passed": result.passed,
+                    "score": result.score,
+                    "failed_assertions": result.failed_assertions,
+                    "duration_seconds": result.duration_seconds,
+                }
+            ],
         }
         report_md = self.evaluator.generate_report(summary)
         assert "Promptfoo Evaluation Report" in report_md
@@ -157,6 +159,7 @@ class TestEvaluationManager:
 
     def test_evaluate_briefing_returns_result(self, sample_briefing):
         from evaluation.test_suite import EvaluationManager
+
         manager = EvaluationManager()
         result = manager.evaluate_briefing(
             run_id="mgr-test-001",
@@ -169,6 +172,7 @@ class TestEvaluationManager:
 
     def test_compute_tool_accuracy_full_briefing(self, sample_briefing):
         from evaluation.test_suite import EvaluationManager
+
         manager = EvaluationManager()
         score = manager._compute_tool_accuracy(sample_briefing)
         assert score > 0.5  # Should be high since all sections present
@@ -176,6 +180,7 @@ class TestEvaluationManager:
     def test_generate_summary_markdown(self):
         from evaluation.test_suite import EvaluationManager
         from src.utils.models import EvaluationResult
+
         manager = EvaluationManager()
         result = EvaluationResult(
             run_id="summary-test",

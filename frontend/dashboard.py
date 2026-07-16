@@ -12,12 +12,12 @@ from typing import Any, Dict, Optional
 
 import streamlit as st
 
-from .styles import CUSTOM_CSS, STATUS_COLORS, AGENT_STEPS
-from .sidebar import render_sidebar
-from .components.report_tabs import render_report_tabs
-from .components.human_review import render_human_review_gate
 from .components.export_panel import render_export_panel
+from .components.human_review import render_human_review_gate
+from .components.report_tabs import render_report_tabs
 from .runner import DirectRunner
+from .sidebar import render_sidebar
+from .styles import AGENT_STEPS, CUSTOM_CSS, STATUS_COLORS
 
 
 def render_dashboard() -> None:
@@ -25,7 +25,8 @@ def render_dashboard() -> None:
     st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
     # ── Hero Header ───────────────────────────────────────────
-    st.markdown("""
+    st.markdown(
+        """
     <div class="main-header">
         <h1 style="font-size:38px;font-weight:800;margin:0 0 0.35rem 0;
                    letter-spacing:-0.5px;line-height:1.15;">
@@ -44,7 +45,9 @@ def render_dashboard() -> None:
             <span class="header-badge">📊 RAGAS Evaluated</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     _init_session_state()
     config = render_sidebar()
@@ -60,6 +63,7 @@ def render_dashboard() -> None:
 
 
 # ── Session state ─────────────────────────────────────────────────────────────
+
 
 def _init_session_state() -> None:
     defaults = {
@@ -80,27 +84,33 @@ def _init_session_state() -> None:
             st.session_state[k] = v
 
 
-
 # ── Run lifecycle ──────────────────────────────────────────────────────────────
+
 
 def _start_run(config: Dict[str, Any]) -> None:
     if not config["industry"]:
-        st.markdown("""
+        st.markdown(
+            """
         <div style="display:flex;align-items:center;gap:0.6rem;padding:0.75rem 1rem;
                     background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;
                     margin:0.5rem 0;color:#991b1b;font-size:0.9rem;">
             ⚠️ <strong>Please select or enter an industry.</strong>
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
         return
     if not config["competitors"]:
-        st.markdown("""
+        st.markdown(
+            """
         <div style="display:flex;align-items:center;gap:0.6rem;padding:0.75rem 1rem;
                     background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;
                     margin:0.5rem 0;color:#991b1b;font-size:0.9rem;">
             ⚠️ <strong>Please enter at least one competitor.</strong>
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
         return
 
     run_id = str(uuid.uuid4())
@@ -120,12 +130,15 @@ def _start_run(config: Dict[str, Any]) -> None:
 def _execute_run(run_id: str, config: Dict[str, Any]) -> None:
     """Execute the crew run with live progress display."""
     # ── Live progress header ──────────────────────────────────
-    st.markdown("""
+    st.markdown(
+        """
     <div class="section-header" style="margin-bottom:0.75rem;">
         <span class="sh-icon">⚡</span>
         <span class="sh-title">Generating Competitive Intelligence Report…</span>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     # Pipeline steps indicator
     _render_pipeline_steps(active=0)
@@ -135,9 +148,7 @@ def _execute_run(run_id: str, config: Dict[str, Any]) -> None:
 
     progress_state = {"pct": 0, "msg": "Starting…", "step": 0}
 
-    STEP_MAP = {
-        5: 0, 15: 0, 30: 1, 50: 1, 65: 2, 75: 2, 85: 3, 95: 4, 100: 4
-    }
+    STEP_MAP = {5: 0, 15: 0, 30: 1, 50: 1, 65: 2, 75: 2, 85: 3, 95: 4, 100: 4}
 
     def on_progress(msg: str, pct: int) -> None:
         progress_state["pct"] = pct
@@ -171,9 +182,9 @@ def _execute_run(run_id: str, config: Dict[str, Any]) -> None:
             progress_bar.progress(100, text="✅ Complete!")
             status_text.markdown(
                 '<div style="display:flex;align-items:center;gap:0.6rem;padding:0.75rem 1rem;'
-                'background:#f0fdf4;border:1px solid #86efac;border-radius:8px;'
+                "background:#f0fdf4;border:1px solid #86efac;border-radius:8px;"
                 'margin:0.5rem 0;color:#166534;font-size:0.9rem;font-weight:600;">'
-                '✅ Report generated successfully!</div>',
+                "✅ Report generated successfully!</div>",
                 unsafe_allow_html=True,
             )
 
@@ -186,7 +197,7 @@ def _execute_run(run_id: str, config: Dict[str, Any]) -> None:
                 st.session_state.run_status = "failed"
                 st.markdown(
                     f'<div style="display:flex;align-items:center;gap:0.6rem;padding:0.75rem 1rem;'
-                    f'background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;'
+                    f"background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;"
                     f'margin:0.5rem 0;color:#991b1b;font-size:0.9rem;">'
                     f'❌ <strong>Generation failed:</strong> {result.get("error", "Unknown error")}</div>',
                     unsafe_allow_html=True,
@@ -196,15 +207,15 @@ def _execute_run(run_id: str, config: Dict[str, Any]) -> None:
             st.session_state.run_status = "failed"
             st.markdown(
                 f'<div style="display:flex;align-items:center;gap:0.6rem;padding:0.75rem 1rem;'
-                f'background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;'
+                f"background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;"
                 f'margin:0.5rem 0;color:#991b1b;font-size:0.9rem;">'
-                f'❌ <strong>Error:</strong> {exc}</div>',
+                f"❌ <strong>Error:</strong> {exc}</div>",
                 unsafe_allow_html=True,
             )
             if config.get("show_raw_output"):
                 import traceback
-                st.code(traceback.format_exc(), language="python")
 
+                st.code(traceback.format_exc(), language="python")
 
 
 def _render_pipeline_steps(active: int = 0, done_up_to: int = -1) -> None:
@@ -213,8 +224,7 @@ def _render_pipeline_steps(active: int = 0, done_up_to: int = -1) -> None:
     for i, (icon, label) in enumerate(AGENT_STEPS):
         if i < done_up_to:
             style = (
-                "background:#d1fae5;color:#065f46;border:1.5px solid #6ee7b7;"
-                "font-weight:700;"
+                "background:#d1fae5;color:#065f46;border:1.5px solid #6ee7b7;" "font-weight:700;"
             )
             marker = "✓ "
         elif i == active:
@@ -225,26 +235,24 @@ def _render_pipeline_steps(active: int = 0, done_up_to: int = -1) -> None:
             marker = "▶ "
         else:
             style = (
-                "background:#f3f4f6;color:#9ca3af;border:1.5px solid #e5e7eb;"
-                "font-weight:500;"
+                "background:#f3f4f6;color:#9ca3af;border:1.5px solid #e5e7eb;" "font-weight:500;"
             )
             marker = ""
         parts.append(
             f'<span style="display:inline-flex;align-items:center;gap:4px;'
-            f'padding:5px 12px;border-radius:20px;font-size:0.78rem;'
+            f"padding:5px 12px;border-radius:20px;font-size:0.78rem;"
             f'transition:all 0.2s;{style}">'
-            f'{icon} {marker}{label}</span>'
+            f"{icon} {marker}{label}</span>"
         )
     html = (
         '<div style="display:flex;flex-wrap:wrap;gap:0.45rem;'
-        'margin:0.6rem 0 1rem 0;">'
-        + "".join(parts)
-        + "</div>"
+        'margin:0.6rem 0 1rem 0;">' + "".join(parts) + "</div>"
     )
     st.markdown(html, unsafe_allow_html=True)
 
 
 # ── Main content area ─────────────────────────────────────────────────────────
+
 
 def _render_run_area(config: Dict[str, Any]) -> None:
     run_id = st.session_state.run_id
@@ -254,10 +262,10 @@ def _render_run_area(config: Dict[str, Any]) -> None:
     # ── Status bar ────────────────────────────────────────────
     icon = STATUS_COLORS.get(run_status or "pending", "⚪")
     status_colors = {
-        "running":   ("background:#dbeafe;color:#1e40af;border:1.5px solid #93c5fd;",),
+        "running": ("background:#dbeafe;color:#1e40af;border:1.5px solid #93c5fd;",),
         "completed": ("background:#d1fae5;color:#065f46;border:1.5px solid #6ee7b7;",),
-        "failed":    ("background:#fee2e2;color:#991b1b;border:1.5px solid #fca5a5;",),
-        "pending":   ("background:#f3f4f6;color:#6b7280;border:1.5px solid #d1d5db;",),
+        "failed": ("background:#fee2e2;color:#991b1b;border:1.5px solid #fca5a5;",),
+        "pending": ("background:#f3f4f6;color:#6b7280;border:1.5px solid #d1d5db;",),
     }
     sbadge_style = status_colors.get(run_status or "pending", status_colors["pending"])[0]
 
@@ -272,7 +280,8 @@ def _render_run_area(config: Dict[str, Any]) -> None:
         "font-size:0.78rem;color:#374151;font-weight:500;"
     )
 
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div style="display:flex;align-items:center;flex-wrap:wrap;gap:0.75rem;
                 padding:0.7rem 1.1rem;background:#ffffff;border:1px solid #e5e7eb;
                 border-radius:10px;margin-bottom:1.1rem;
@@ -300,7 +309,9 @@ def _render_run_area(config: Dict[str, Any]) -> None:
             🔄 New Run
         </a>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     if run_status != "completed" or not report_data:
         return
@@ -310,6 +321,7 @@ def _render_run_area(config: Dict[str, Any]) -> None:
 
     # ── Human review gate ─────────────────────────────────────
     from config.settings import settings
+
     if (
         settings.human_review_enabled
         and config.get("human_review_enabled")
@@ -325,18 +337,24 @@ def _render_run_area(config: Dict[str, Any]) -> None:
         if review_result is not None:
             st.session_state.review_submitted = True
             if not review_result["approved"]:
-                st.markdown("""
+                st.markdown(
+                    """
                 <div style="padding:0.75rem 1rem;background:#fffbeb;border:1px solid #fcd34d;
                             border-radius:8px;color:#92400e;font-size:0.9rem;margin:0.5rem 0;">
                     🚫 <strong>Report rejected.</strong> Click <strong>New Run</strong> to start again.
                 </div>
-                """, unsafe_allow_html=True)
+                """,
+                    unsafe_allow_html=True,
+                )
                 return
             if review_result.get("edited_sections"):
                 import re
+
                 for section, content in review_result["edited_sections"].items():
                     pattern = rf"(## {re.escape(section)}\n+)(.*?)(?=\n## |\Z)"
-                    markdown = re.sub(pattern, rf"\g<1>{content}\n", markdown, flags=re.DOTALL | re.IGNORECASE)
+                    markdown = re.sub(
+                        pattern, rf"\g<1>{content}\n", markdown, flags=re.DOTALL | re.IGNORECASE
+                    )
                 st.session_state.report_data["full_markdown"] = markdown
         else:
             return
@@ -357,6 +375,7 @@ def _render_run_area(config: Dict[str, Any]) -> None:
             with st.spinner("Running evaluation…"):
                 try:
                     from evaluation.test_suite import evaluation_manager
+
                     eval_result = evaluation_manager.evaluate_briefing(
                         run_id=run_id,
                         briefing=markdown,
@@ -364,17 +383,20 @@ def _render_run_area(config: Dict[str, Any]) -> None:
                         competitors=config["competitors"],
                     )
                     st.session_state.evaluation_data = eval_result.model_dump()
-                    st.markdown("""
+                    st.markdown(
+                        """
                     <div style="padding:0.65rem 1rem;background:#f0fdf4;border:1px solid #86efac;
                                 border-radius:8px;color:#166534;font-size:0.88rem;margin-top:0.4rem;">
                         ✅ <strong>Evaluation complete!</strong>
                     </div>
-                    """, unsafe_allow_html=True)
+                    """,
+                        unsafe_allow_html=True,
+                    )
                 except Exception as exc:
                     st.markdown(
                         f'<div style="padding:0.65rem 1rem;background:#fef2f2;border:1px solid #fca5a5;'
                         f'border-radius:8px;color:#991b1b;font-size:0.88rem;margin-top:0.4rem;">'
-                        f'❌ <strong>Evaluation failed:</strong> {exc}</div>',
+                        f"❌ <strong>Evaluation failed:</strong> {exc}</div>",
                         unsafe_allow_html=True,
                     )
 
@@ -396,7 +418,7 @@ def _render_run_area(config: Dict[str, Any]) -> None:
     with st.expander("🧪 Capstone Regression Suite (5 Scenarios)", expanded=False):
         st.markdown(
             '<p style="color:#6b7280;font-size:0.88rem;margin:0 0 0.6rem 0;">'
-            'Run all 5 defined capstone test scenarios using Promptfoo.</p>',
+            "Run all 5 defined capstone test scenarios using Promptfoo.</p>",
             unsafe_allow_html=True,
         )
         if st.button("▶ Run All 5 Scenarios", key="run_regression"):
@@ -406,10 +428,12 @@ def _render_run_area(config: Dict[str, Any]) -> None:
 
 # ── Stats Bar ─────────────────────────────────────────────────────────────────
 
+
 def _render_stats_bar() -> None:
     """Render a live metrics bar beneath the hero header using DB aggregates."""
     try:
         from src.utils.database import db_manager
+
         m = db_manager.get_metrics_summary()
     except Exception:
         m = {
@@ -473,6 +497,7 @@ def _render_stats_bar() -> None:
 
 
 # ── Welcome Screen ────────────────────────────────────────────────────────────
+
 
 def _render_welcome_screen() -> None:
     """Render the landing welcome screen shown before a run is started."""
@@ -540,12 +565,42 @@ def _render_welcome_screen() -> None:
     )
 
     features = [
-        ("🤖", "Multi-Agent CrewAI", "Specialised Research, Analyst & Writer agents coordinate autonomously.", "CrewAI"),
-        ("🧠", "OpenRouter LLM", "Auto-cascade across Gemma-4, Llama-3.3, Qwen3-Coder & NVIDIA Nemotron free models.", "OpenRouter"),
-        ("🔎", "FAISS RAG", "Semantic search over your own knowledge base for grounded answers.", "Vector Search"),
-        ("🛡️", "Governance Layer", "Rate limits, cost caps, prompt-injection guards & audit trails.", "Enterprise Ready"),
-        ("📊", "RAGAS + DeepEval", "Automated faithfulness, precision & recall scoring per run.", "Evaluation"),
-        ("📄", "Multi-format Export", "One-click PDF, PPTX, HTML, Markdown & JSON report bundles.", "Export"),
+        (
+            "🤖",
+            "Multi-Agent CrewAI",
+            "Specialised Research, Analyst & Writer agents coordinate autonomously.",
+            "CrewAI",
+        ),
+        (
+            "🧠",
+            "OpenRouter LLM",
+            "Auto-cascade across Gemma-4, Llama-3.3, Qwen3-Coder & NVIDIA Nemotron free models.",
+            "OpenRouter",
+        ),
+        (
+            "🔎",
+            "FAISS RAG",
+            "Semantic search over your own knowledge base for grounded answers.",
+            "Vector Search",
+        ),
+        (
+            "🛡️",
+            "Governance Layer",
+            "Rate limits, cost caps, prompt-injection guards & audit trails.",
+            "Enterprise Ready",
+        ),
+        (
+            "📊",
+            "RAGAS + DeepEval",
+            "Automated faithfulness, precision & recall scoring per run.",
+            "Evaluation",
+        ),
+        (
+            "📄",
+            "Multi-format Export",
+            "One-click PDF, PPTX, HTML, Markdown & JSON report bundles.",
+            "Export",
+        ),
     ]
 
     c1, c2, c3 = st.columns(3)
@@ -591,6 +646,7 @@ def _render_welcome_screen() -> None:
 
 # ── Confidence Computation ────────────────────────────────────────────────────
 
+
 def _compute_confidence(markdown: str) -> float:
     """
     Heuristic confidence score (0.0–1.0) based on:
@@ -605,25 +661,24 @@ def _compute_confidence(markdown: str) -> float:
 
     word_count = len(markdown.split())
     # Citations — patterns like [1], [Source: X], [[n]]
-    citations = len(re.findall(r"\[\d+\]|\[Source:[^\]]+\]|\[\[[^\]]+\]\]", markdown, re.IGNORECASE))
+    citations = len(
+        re.findall(r"\[\d+\]|\[Source:[^\]]+\]|\[\[[^\]]+\]\]", markdown, re.IGNORECASE)
+    )
     # Key sections present
     key_sections = ["SWOT", "pricing", "recommendation", "executive summary", "market position"]
     sections_found = sum(1 for s in key_sections if s.lower() in markdown.lower())
 
     # Scoring components (each normalised to 0–1, then weighted)
-    length_score = min(word_count / 1500, 1.0)          # full marks at 1500+ words
-    citation_score = min(citations / 10, 1.0)           # full marks at 10+ citations
+    length_score = min(word_count / 1500, 1.0)  # full marks at 1500+ words
+    citation_score = min(citations / 10, 1.0)  # full marks at 10+ citations
     section_score = sections_found / len(key_sections)
 
-    confidence = (
-        length_score   * 0.35
-        + citation_score * 0.40
-        + section_score  * 0.25
-    )
+    confidence = length_score * 0.35 + citation_score * 0.40 + section_score * 0.25
     return round(min(confidence, 1.0), 3)
 
 
 # ── Flagged Items ─────────────────────────────────────────────────────────────
+
 
 def _get_flagged_items(markdown: str) -> list[str]:
     """
@@ -666,6 +721,7 @@ def _get_flagged_items(markdown: str) -> list[str]:
 
 # ── Metrics Loader ────────────────────────────────────────────────────────────
 
+
 def _load_metrics() -> Dict[str, Any]:
     """
     Load aggregated metrics from the database for the report tabs
@@ -674,6 +730,7 @@ def _load_metrics() -> Dict[str, Any]:
     """
     try:
         from src.utils.database import db_manager
+
         return db_manager.get_metrics_summary()
     except Exception:
         return {
@@ -689,6 +746,7 @@ def _load_metrics() -> Dict[str, Any]:
 
 # ── Regression Suite Runner ───────────────────────────────────────────────────
 
+
 def _run_regression_suite() -> None:
     """
     Execute the 5 capstone Promptfoo regression scenarios and display results.
@@ -698,7 +756,12 @@ def _run_regression_suite() -> None:
         ("SaaS / CRM", ["Salesforce", "HubSpot", "Pipedrive"], "North America", "last 30 days"),
         ("Fintech / Payments", ["Stripe", "Square", "Adyen"], "Global", "last 30 days"),
         ("AI / LLM / Generative AI", ["OpenAI", "Anthropic", "Mistral"], "Global", "last 14 days"),
-        ("Cybersecurity", ["CrowdStrike", "SentinelOne", "Palo Alto"], "North America", "last 30 days"),
+        (
+            "Cybersecurity",
+            ["CrowdStrike", "SentinelOne", "Palo Alto"],
+            "North America",
+            "last 30 days",
+        ),
         ("Healthcare SaaS", ["Epic", "Veeva", "Meditech"], "United States", "last 60 days"),
     ]
 
@@ -709,6 +772,7 @@ def _run_regression_suite() -> None:
         progress.progress(idx / len(SCENARIOS), text=f"Running scenario {idx}/{len(SCENARIOS)}…")
         try:
             from evaluation.promptfoo_eval import PromptfooEvaluator
+
             evaluator = PromptfooEvaluator()
             result = evaluator.run_scenario(
                 industry=industry,
@@ -732,7 +796,9 @@ def _run_regression_suite() -> None:
                 "Region": region,
                 "Period": period,
                 "Score": f"{score:.2f}" if isinstance(score, float) else str(score),
-                "Status": "✅ Pass" if passed is True else ("⏭ Skipped" if passed is None else "❌ Fail"),
+                "Status": (
+                    "✅ Pass" if passed is True else ("⏭ Skipped" if passed is None else "❌ Fail")
+                ),
                 "Detail": detail[:80],
             }
         )
@@ -765,14 +831,14 @@ def _run_regression_suite() -> None:
         st.markdown(
             '<div style="padding:0.7rem 1rem;background:#f0fdf4;border:1px solid #86efac;'
             'border-radius:8px;color:#166534;font-size:0.9rem;margin-top:0.6rem;">'
-            f'🎉 <strong>All {pass_count} scenarios passed!</strong></div>',
+            f"🎉 <strong>All {pass_count} scenarios passed!</strong></div>",
             unsafe_allow_html=True,
         )
     else:
         st.markdown(
             f'<div style="padding:0.7rem 1rem;background:#fffbeb;border:1px solid #fcd34d;'
             f'border-radius:8px;color:#92400e;font-size:0.9rem;margin-top:0.6rem;">'
-            f'⚠️ <strong>{pass_count} passed · {fail_count} failed · {skip_count} skipped</strong>'
+            f"⚠️ <strong>{pass_count} passed · {fail_count} failed · {skip_count} skipped</strong>"
             f"</div>",
             unsafe_allow_html=True,
         )

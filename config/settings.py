@@ -31,9 +31,8 @@ LiteLLM model-string convention
 from __future__ import annotations
 
 import logging
-import os
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -47,7 +46,7 @@ _log = logging.getLogger(__name__)
 # nvidia/nemotron-3-ultra-550b-a55b confirmed working (from run logs Jul 2026).
 # Put nvidia FIRST as primary — it consistently succeeded where google/llama failed.
 VALID_FREE_MODELS: List[str] = [
-    "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",   # CONFIRMED WORKING
+    "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",  # CONFIRMED WORKING
     "openrouter/meta-llama/llama-3.3-70b-instruct:free",
     "openrouter/google/gemma-4-31b-it:free",
     "openrouter/meta-llama/llama-3.2-3b-instruct:free",
@@ -56,9 +55,9 @@ VALID_FREE_MODELS: List[str] = [
 ]
 
 # Default fallback used when .env is missing or model is invalid
-_DEFAULT_PRIMARY      = "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free"
-_DEFAULT_FALLBACK     = "openrouter/meta-llama/llama-3.3-70b-instruct:free"
-_DEFAULT_LAST_RESORT  = "openrouter/meta-llama/llama-3.2-3b-instruct:free"
+_DEFAULT_PRIMARY = "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free"
+_DEFAULT_FALLBACK = "openrouter/meta-llama/llama-3.3-70b-instruct:free"
+_DEFAULT_LAST_RESORT = "openrouter/meta-llama/llama-3.2-3b-instruct:free"
 
 # ── OpenRouter base URL ───────────────────────────────────────────────────────
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
@@ -109,6 +108,7 @@ def _validate_model(model: str, context: str = "model") -> str:
 
 
 # ── Settings class ────────────────────────────────────────────────────────────
+
 
 class Settings(BaseSettings):
     """Application-wide configuration loaded from environment / .env file."""
@@ -180,10 +180,9 @@ class Settings(BaseSettings):
     top_k_results: int = Field(default=5, alias="TOP_K_RESULTS")
 
     # ── Run Limits ───────────────────────────────────────────────────────────
-    # Reduced defaults for faster output (overridable via .env)
-    max_sources: int = Field(default=5, alias="MAX_SOURCES")
-    max_steps: int = Field(default=10, alias="MAX_STEPS")
-    max_runtime_seconds: int = Field(default=300, alias="MAX_RUNTIME_SECONDS")
+    max_sources: int = Field(default=15, alias="MAX_SOURCES")
+    max_steps: int = Field(default=25, alias="MAX_STEPS")
+    max_runtime_seconds: int = Field(default=900, alias="MAX_RUNTIME_SECONDS")
     max_cost_usd: float = Field(default=0.02, alias="MAX_COST_USD")
 
     # ── Logging ──────────────────────────────────────────────────────────────
@@ -335,8 +334,7 @@ class Settings(BaseSettings):
 
         if not self.openrouter_api_key:
             _log.error(
-                "[Config] OPENROUTER_API_KEY is not set. "
-                "Add it to your .env file and restart."
+                "[Config] OPENROUTER_API_KEY is not set. " "Add it to your .env file and restart."
             )
 
 

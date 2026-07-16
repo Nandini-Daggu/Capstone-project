@@ -10,7 +10,6 @@ Also writes a JSONL trace file for offline analysis.
 from __future__ import annotations
 
 import contextlib
-import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,6 +18,7 @@ from typing import Any, Dict, Generator, List, Optional
 from pydantic import BaseModel, Field
 
 from config.settings import settings
+
 from .logger import get_logger
 
 log = get_logger(__name__)
@@ -28,14 +28,14 @@ log = get_logger(__name__)
 
 # Prices per 1k tokens in USD
 MODEL_COSTS: Dict[str, Dict[str, float]] = {
-    "default":          {"input": 0.0001, "output": 0.0002},  # Very low for free models
-    "gemma-4-31b-it":   {"input": 0.0,    "output": 0.0},
-    "gemma-4-26b":      {"input": 0.0,    "output": 0.0},
-    "llama-3.3-70b":    {"input": 0.0,    "output": 0.0},
-    "llama-3.2-3b":     {"input": 0.0,    "output": 0.0},
-    "qwen3-coder":      {"input": 0.0,    "output": 0.0},
-    "nemotron-3-ultra": {"input": 0.0,    "output": 0.0},
-    "hermes-3-llama":   {"input": 0.0,    "output": 0.0},
+    "default": {"input": 0.0001, "output": 0.0002},  # Very low for free models
+    "gemma-4-31b-it": {"input": 0.0, "output": 0.0},
+    "gemma-4-26b": {"input": 0.0, "output": 0.0},
+    "llama-3.3-70b": {"input": 0.0, "output": 0.0},
+    "llama-3.2-3b": {"input": 0.0, "output": 0.0},
+    "qwen3-coder": {"input": 0.0, "output": 0.0},
+    "nemotron-3-ultra": {"input": 0.0, "output": 0.0},
+    "hermes-3-llama": {"input": 0.0, "output": 0.0},
 }
 
 
@@ -50,6 +50,7 @@ def estimate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> flo
 
 # ── Span model ────────────────────────────────────────────────────────────────
 
+
 class TraceSpan(BaseModel):
     """A single traced operation span."""
 
@@ -59,9 +60,7 @@ class TraceSpan(BaseModel):
     agent: str
     operation: str
     model: Optional[str] = None
-    started_at: str = Field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    started_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     ended_at: Optional[str] = None
     duration_ms: float = 0.0
 
@@ -81,6 +80,7 @@ class TraceSpan(BaseModel):
 
 
 # ── Observability tracker ──────────────────────────────────────────────────────
+
 
 class ObservabilityTracker:
     """
@@ -151,9 +151,7 @@ class ObservabilityTracker:
             span.metadata.update(metadata)
 
         if span.model:
-            span.estimated_cost_usd = estimate_cost(
-                span.model, prompt_tokens, completion_tokens
-            )
+            span.estimated_cost_usd = estimate_cost(span.model, prompt_tokens, completion_tokens)
 
         # Accumulate run metrics
         m = self._run_metrics[span.run_id]

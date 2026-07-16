@@ -8,9 +8,6 @@ Uses the CacheManager for persistence across restarts.
 
 from __future__ import annotations
 
-import json
-import uuid
-from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from src.utils.cache import cache_manager

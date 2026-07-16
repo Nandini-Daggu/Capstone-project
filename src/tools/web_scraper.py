@@ -10,9 +10,8 @@ from __future__ import annotations
 
 import hashlib
 import re
-import time
-from typing import Dict, List, Optional, Type
-from urllib.parse import urljoin, urlparse
+from typing import Type
+from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -22,7 +21,7 @@ from pydantic import BaseModel, Field
 from config.settings import settings
 from src.utils.cache import cache_manager
 from src.utils.logger import get_logger
-from src.utils.retry import RetryConfig, get_circuit_breaker, with_retry
+from src.utils.retry import get_circuit_breaker
 
 log = get_logger(__name__)
 
@@ -30,8 +29,7 @@ _scraper_breaker = get_circuit_breaker("web_scraper")
 
 HEADERS = {
     "User-Agent": (
-        "Mozilla/5.0 (compatible; CompetitiveIntelligenceBot/1.0; "
-        "+https://github.com/ci-crew)"
+        "Mozilla/5.0 (compatible; CompetitiveIntelligenceBot/1.0; " "+https://github.com/ci-crew)"
     ),
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
@@ -39,8 +37,16 @@ HEADERS = {
 
 # Tags to remove (navigation, ads, etc.)
 NOISE_TAGS = [
-    "script", "style", "nav", "footer", "header", "aside",
-    "form", "iframe", "noscript", "advertisement",
+    "script",
+    "style",
+    "nav",
+    "footer",
+    "header",
+    "aside",
+    "form",
+    "iframe",
+    "noscript",
+    "advertisement",
 ]
 
 
@@ -91,16 +97,16 @@ class WebScraperTool(BaseTool):
 
         # Check cache
         cache_key = f"scrape:{url}:{extract_type}"
-        cached = cache_manager.get(namespace="scraper", key=hashlib.sha256(cache_key.encode()).hexdigest())
+        cached = cache_manager.get(
+            namespace="scraper", key=hashlib.sha256(cache_key.encode()).hexdigest()
+        )
         if cached:
             log.debug(f"[Scraper] Cache HIT: {url[:60]}")
             return cached[:max_chars]
 
         # Scrape
         try:
-            result = _scraper_breaker.call(
-                self._scrape_url, url, extract_type, max_chars
-            )
+            result = _scraper_breaker.call(self._scrape_url, url, extract_type, max_chars)
         except Exception as exc:
             log.warning(f"[Scraper] Failed to scrape {url}: {exc}")
             return f"Could not scrape {url}: {str(exc)[:200]}"
@@ -178,8 +184,14 @@ class WebScraperTool(BaseTool):
         lines = []
         # Look for pricing tables, plans, cost mentions
         pricing_selectors = [
-            "table", ".pricing", ".price", ".plan", "[class*='price']",
-            "[class*='plan']", "[class*='tier']", "[class*='cost']",
+            "table",
+            ".pricing",
+            ".price",
+            ".plan",
+            "[class*='price']",
+            "[class*='plan']",
+            "[class*='tier']",
+            "[class*='cost']",
         ]
         found_pricing = False
         for selector in pricing_selectors:
@@ -199,8 +211,13 @@ class WebScraperTool(BaseTool):
         """Extract product feature content."""
         lines = []
         for selector in [
-            ".features", ".product-features", "h1", "h2", "h3",
-            ".feature-list", "[class*='feature']",
+            ".features",
+            ".product-features",
+            "h1",
+            "h2",
+            "h3",
+            ".feature-list",
+            "[class*='feature']",
         ]:
             for elem in soup.select(selector):
                 text = elem.get_text(separator=" ", strip=True)
@@ -220,7 +237,9 @@ class WebScraperTool(BaseTool):
         """Extract text from PDF binary content."""
         try:
             import io
+
             import pdfplumber
+
             with pdfplumber.open(io.BytesIO(content)) as pdf:
                 pages_text = []
                 for page in pdf.pages[:10]:  # Max 10 pages

@@ -7,7 +7,7 @@ Searches for funding, acquisitions, financial news, and market reports.
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Type
+from typing import Dict, List, Type
 
 from crewai.tools import BaseTool
 from duckduckgo_search import DDGS
@@ -106,9 +106,7 @@ class MarketIntelligenceTool(BaseTool):
         for template in templates[:5]:  # Max 5 queries per company
             query = template.format(company=company)
             try:
-                results = _market_breaker.call(
-                    self._search, query, time_filter
-                )
+                results = _market_breaker.call(self._search, query, time_filter)
                 for r in results:
                     r["data_type"] = data_type
                     r["company"] = company
@@ -140,14 +138,16 @@ class MarketIntelligenceTool(BaseTool):
         results = []
         with DDGS() as ddgs:
             for r in ddgs.news(keywords=query, max_results=5, timelimit=time_filter):
-                results.append({
-                    "title": r.get("title", ""),
-                    "url": r.get("url", r.get("href", "")),
-                    "snippet": r.get("body", r.get("summary", ""))[:400],
-                    "source_name": r.get("source", "Unknown"),
-                    "published_date": r.get("date", ""),
-                    "query": query,
-                })
+                results.append(
+                    {
+                        "title": r.get("title", ""),
+                        "url": r.get("url", r.get("href", "")),
+                        "snippet": r.get("body", r.get("summary", ""))[:400],
+                        "source_name": r.get("source", "Unknown"),
+                        "published_date": r.get("date", ""),
+                        "query": query,
+                    }
+                )
         return results
 
     def _format_intelligence(self, results: List[Dict], company: str) -> str:

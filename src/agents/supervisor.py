@@ -16,18 +16,13 @@ Responsibilities:
 from __future__ import annotations
 
 import re
-import time
-import uuid
-from datetime import datetime, timezone
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from crewai import Agent, Task
 
 from config.settings import settings
 from src.utils.audit import audit_logger
 from src.utils.logger import get_logger
-from src.utils.models import RunMetadata, RunStatus
-from src.utils.observability import obs_tracker
 
 log = get_logger(__name__)
 
@@ -111,7 +106,10 @@ class GovernanceGuard:
         if steps_used > settings.max_steps:
             return False, f"Step limit exceeded: {steps_used}/{settings.max_steps}"
         if elapsed_seconds > settings.max_runtime_seconds:
-            return False, f"Time limit exceeded: {elapsed_seconds:.0f}s/{settings.max_runtime_seconds}s"
+            return (
+                False,
+                f"Time limit exceeded: {elapsed_seconds:.0f}s/{settings.max_runtime_seconds}s",
+            )
         if estimated_cost > settings.max_cost_usd:
             return False, f"Cost limit exceeded: ${estimated_cost:.4f}/${settings.max_cost_usd}"
         return True, "ok"
@@ -124,7 +122,7 @@ class SupervisorAgent:
 
     def __init__(
         self,
-        model=None,          # str model name OR a crewai.llm.LLM instance
+        model=None,  # str model name OR a crewai.llm.LLM instance
         verbose: bool = True,
     ) -> None:
         self.model = model if model is not None else settings.model_primary

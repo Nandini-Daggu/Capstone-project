@@ -7,7 +7,6 @@ Falls back to Tavily if available and DuckDuckGo fails.
 
 from __future__ import annotations
 
-import time
 from typing import Any, Dict, List, Optional, Type
 
 from crewai.tools import BaseTool
@@ -17,7 +16,7 @@ from pydantic import BaseModel, Field
 from config.settings import settings
 from src.utils.cache import cache_manager
 from src.utils.logger import get_logger
-from src.utils.retry import RetryConfig, get_circuit_breaker, with_retry
+from src.utils.retry import get_circuit_breaker
 
 log = get_logger(__name__)
 
@@ -69,9 +68,7 @@ class WebSearchTool(BaseTool):
         # Try DuckDuckGo via circuit breaker
         results = []
         try:
-            results = _ddg_breaker.call(
-                self._search_ddg, query, max_results, region, time_filter
-            )
+            results = _ddg_breaker.call(self._search_ddg, query, max_results, region, time_filter)
         except Exception as ddg_exc:
             log.warning(f"[WebSearch] DuckDuckGo failed: {ddg_exc}")
             # Fallback to Tavily
@@ -80,7 +77,9 @@ class WebSearchTool(BaseTool):
                     results = self._search_tavily(query, max_results)
                 except Exception as tavily_exc:
                     log.error(f"[WebSearch] Tavily fallback also failed: {tavily_exc}")
-                    return f"Search failed for query: {query}. Both DuckDuckGo and Tavily unavailable."
+                    return (
+                        f"Search failed for query: {query}. Both DuckDuckGo and Tavily unavailable."
+                    )
 
         if results:
             cache_manager.set_search(cache_key, results, "duckduckgo")
@@ -106,13 +105,15 @@ class WebSearchTool(BaseTool):
                 kwargs["timelimit"] = time_filter
 
             for r in ddgs.text(**kwargs):
-                results.append({
-                    "title": r.get("title", ""),
-                    "url": r.get("href", r.get("url", "")),
-                    "snippet": r.get("body", r.get("snippet", "")),
-                    "source": "duckduckgo",
-                    "published_date": r.get("published", ""),
-                })
+                results.append(
+                    {
+                        "title": r.get("title", ""),
+                        "url": r.get("href", r.get("url", "")),
+                        "snippet": r.get("body", r.get("snippet", "")),
+                        "source": "duckduckgo",
+                        "published_date": r.get("published", ""),
+                    }
+                )
         return results
 
     def _search_tavily(self, query: str, max_results: int) -> List[Dict[str, str]]:
@@ -123,13 +124,15 @@ class WebSearchTool(BaseTool):
         response = client.search(query=query, max_results=max_results)
         results = []
         for r in response.get("results", []):
-            results.append({
-                "title": r.get("title", ""),
-                "url": r.get("url", ""),
-                "snippet": r.get("content", ""),
-                "source": "tavily",
-                "published_date": r.get("published_date", ""),
-            })
+            results.append(
+                {
+                    "title": r.get("title", ""),
+                    "url": r.get("url", ""),
+                    "snippet": r.get("content", ""),
+                    "source": "tavily",
+                    "published_date": r.get("published_date", ""),
+                }
+            )
         return results
 
     def _format_results(self, results: List[Dict[str, str]]) -> str:

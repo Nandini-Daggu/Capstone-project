@@ -20,16 +20,17 @@ from crewai import Crew, Process, Task
 from crewai.llm import LLM
 
 from config.settings import settings
-from src.agents.research_agent import ResearchAgent
 from src.agents.analyst_agent import AnalystAgent
-from src.agents.writer_agent import WriterAgent
+from src.agents.research_agent import ResearchAgent
 from src.agents.supervisor import SupervisorAgent
+from src.agents.writer_agent import WriterAgent
 from src.utils.audit import audit_logger
 from src.utils.database import db_manager
 from src.utils.llm_router import make_cascade_llm
 from src.utils.logger import get_logger
 from src.utils.models import RunMetadata, RunStatus
 from src.utils.observability import obs_tracker
+
 from .memory import get_run_memory
 
 log = get_logger(__name__)
@@ -47,7 +48,7 @@ class IntelligenceCrew:
         self,
         model: Optional[str] = None,
         model_cascade: Optional[List[str]] = None,
-        verbose: bool = False,
+        verbose: bool = True,
     ) -> None:
         cascade = list(model_cascade or settings.model_cascade)
         if model and model not in cascade:
@@ -91,25 +92,30 @@ class IntelligenceCrew:
     ) -> None:
         """Insert on first call, update on subsequent calls (cascade retries)."""
         try:
-            db_manager.create_run({
-                "run_id": run_id,
-                "status": RunStatus.RUNNING.value,
-                "industry": industry,
-                "competitors": str(competitors),
-                "region": region,
-                "time_period": time_period,
-                "max_sources": max_sources,
-                "max_steps": max_steps,
-                "started_at": datetime.now(timezone.utc),
-                "model_used": self.model,
-            })
+            db_manager.create_run(
+                {
+                    "run_id": run_id,
+                    "status": RunStatus.RUNNING.value,
+                    "industry": industry,
+                    "competitors": str(competitors),
+                    "region": region,
+                    "time_period": time_period,
+                    "max_sources": max_sources,
+                    "max_steps": max_steps,
+                    "started_at": datetime.now(timezone.utc),
+                    "model_used": self.model,
+                }
+            )
         except Exception as exc:
             if "unique" in str(exc).lower():
                 try:
-                    db_manager.update_run(run_id, {
-                        "status": RunStatus.RUNNING.value,
-                        "model_used": self.model,
-                    })
+                    db_manager.update_run(
+                        run_id,
+                        {
+                            "status": RunStatus.RUNNING.value,
+                            "model_used": self.model,
+                        },
+                    )
                 except Exception:
                     pass
             else:
@@ -136,8 +142,7 @@ class IntelligenceCrew:
         start_time = time.monotonic()
 
         log.info(
-            f"[Crew] Starting {run_id[:8]} | "
-            f"industry={industry} | competitors={competitors}"
+            f"[Crew] Starting {run_id[:8]} | " f"industry={industry} | competitors={competitors}"
         )
 
         self._upsert_run_record(
@@ -205,7 +210,7 @@ class IntelligenceCrew:
             tasks=[research_task, analysis_task, writing_task],
             process=Process.sequential,
             verbose=self._verbose,
-            memory=False,   # disabled — avoids embedder 429s
+            memory=False,  # disabled — avoids embedder 429s
         )
 
         try:
@@ -228,16 +233,19 @@ class IntelligenceCrew:
 
             metrics = obs_tracker.get_run_metrics(run_id)
             try:
-                db_manager.update_run(run_id, {
-                    "status": RunStatus.COMPLETED.value,
-                    "completed_at": datetime.now(timezone.utc),
-                    "duration_seconds": elapsed,
-                    "sources_used": memory.get_sources_count(),
-                    "steps_used": memory.get_steps_count(),
-                    "total_tokens": int(metrics.get("total_tokens", 0)),
-                    "estimated_cost_usd": float(metrics.get("estimated_cost_usd", 0.0)),
-                    "model_used": self.model,
-                })
+                db_manager.update_run(
+                    run_id,
+                    {
+                        "status": RunStatus.COMPLETED.value,
+                        "completed_at": datetime.now(timezone.utc),
+                        "duration_seconds": elapsed,
+                        "sources_used": memory.get_sources_count(),
+                        "steps_used": memory.get_steps_count(),
+                        "total_tokens": int(metrics.get("total_tokens", 0)),
+                        "estimated_cost_usd": float(metrics.get("estimated_cost_usd", 0.0)),
+                        "model_used": self.model,
+                    },
+                )
             except Exception as db_exc:
                 log.warning(f"[Crew] DB update failed (non-fatal): {db_exc}")
 
@@ -271,12 +279,15 @@ class IntelligenceCrew:
             log.error(f"[Crew] {run_id[:8]} failed after {elapsed:.1f}s: {exc}")
             audit_logger.log_error(run_id=run_id, agent="crew", tool=None, error=str(exc))
             try:
-                db_manager.update_run(run_id, {
-                    "status": RunStatus.FAILED.value,
-                    "completed_at": datetime.now(timezone.utc),
-                    "duration_seconds": elapsed,
-                    "error_message": str(exc)[:500],
-                })
+                db_manager.update_run(
+                    run_id,
+                    {
+                        "status": RunStatus.FAILED.value,
+                        "completed_at": datetime.now(timezone.utc),
+                        "duration_seconds": elapsed,
+                        "error_message": str(exc)[:500],
+                    },
+                )
             except Exception:
                 pass
             return {

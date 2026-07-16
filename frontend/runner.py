@@ -93,6 +93,7 @@ class APIClient:
     def generate(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """POST /generate"""
         import requests as req
+
         resp = req.post(f"{self.base_url}/generate", json=request, timeout=10)
         resp.raise_for_status()
         return resp.json()
@@ -100,6 +101,7 @@ class APIClient:
     def poll_status(self, run_id: str) -> Dict[str, Any]:
         """GET /status/{run_id}"""
         import requests as req
+
         resp = req.get(f"{self.base_url}/status/{run_id}", timeout=10)
         resp.raise_for_status()
         return resp.json()
@@ -107,6 +109,7 @@ class APIClient:
     def get_report(self, run_id: str) -> Dict[str, Any]:
         """GET /report/{run_id}"""
         import requests as req
+
         resp = req.get(f"{self.base_url}/report/{run_id}", timeout=10)
         resp.raise_for_status()
         return resp.json()
@@ -114,6 +117,7 @@ class APIClient:
     def get_metrics(self) -> Dict[str, Any]:
         """GET /metrics"""
         import requests as req
+
         resp = req.get(f"{self.base_url}/metrics", timeout=5)
         resp.raise_for_status()
         return resp.json()
@@ -121,6 +125,7 @@ class APIClient:
     def evaluate(self, run_id: str) -> Dict[str, Any]:
         """GET /evaluate/{run_id}"""
         import requests as req
+
         resp = req.get(f"{self.base_url}/evaluate/{run_id}", timeout=30)
         resp.raise_for_status()
         return resp.json()
@@ -128,6 +133,7 @@ class APIClient:
     def submit_review(self, run_id: str, review: Dict[str, Any]) -> Dict[str, Any]:
         """POST /review/{run_id}"""
         import requests as req
+
         resp = req.post(f"{self.base_url}/review/{run_id}", json=review, timeout=10)
         resp.raise_for_status()
         return resp.json()
@@ -136,6 +142,7 @@ class APIClient:
         """Check if the backend is reachable."""
         try:
             import requests as req
+
             resp = req.get(f"{self.base_url}/health", timeout=3)
             return resp.status_code == 200
         except Exception:

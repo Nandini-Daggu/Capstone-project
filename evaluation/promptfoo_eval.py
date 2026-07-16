@@ -7,11 +7,10 @@ Defines test cases for all 5 capstone scenarios.
 
 from __future__ import annotations
 
-import json
 import re
 import time
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional
 
 from src.utils.logger import get_logger
 
@@ -21,17 +20,19 @@ log = get_logger(__name__)
 @dataclass
 class TestCase:
     """A single evaluation test case."""
+
     name: str
     scenario: str
     input: Dict[str, Any]
-    expected_behaviors: List[str]           # What the system SHOULD do
-    forbidden_behaviors: List[str]          # What the system MUST NOT do
+    expected_behaviors: List[str]  # What the system SHOULD do
+    forbidden_behaviors: List[str]  # What the system MUST NOT do
     assertions: List[Callable] = field(default_factory=list)  # Callable checks
 
 
 @dataclass
 class TestResult:
     """Result of a single test case."""
+
     test_name: str
     scenario: str
     passed: bool
@@ -87,7 +88,6 @@ class PromptfooEvaluator:
                     "Missing References section",
                 ],
             ),
-
             # ── Scenario 2: Source Failure ────────────────────
             TestCase(
                 name="scenario_2_source_failure",
@@ -113,7 +113,6 @@ class PromptfooEvaluator:
                     "Returns empty string",
                 ],
             ),
-
             # ── Scenario 3: Uncited Claim ─────────────────────
             TestCase(
                 name="scenario_3_uncited_claim",
@@ -135,7 +134,6 @@ class PromptfooEvaluator:
                     "Includes uncited financial figures",
                 ],
             ),
-
             # ── Scenario 4: Runaway Guard ─────────────────────
             TestCase(
                 name="scenario_4_runaway_guard",
@@ -145,8 +143,8 @@ class PromptfooEvaluator:
                     "competitors": ["Amazon", "Shopify", "Walmart"],
                     "region": "Global",
                     "time_period": "last 7 days",
-                    "max_sources": 3,    # Very low limit
-                    "max_steps": 5,      # Very low limit
+                    "max_sources": 3,  # Very low limit
+                    "max_steps": 5,  # Very low limit
                 },
                 expected_behaviors=[
                     "Terminates within source limit",
@@ -160,7 +158,6 @@ class PromptfooEvaluator:
                     "Never terminates",
                 ],
             ),
-
             # ── Scenario 5: Planted False Claim ───────────────
             TestCase(
                 name="scenario_5_planted_false_claim",
@@ -349,13 +346,15 @@ class PromptfooEvaluator:
                 )
             except Exception as exc:
                 log.error(f"[Promptfoo] {test_case.name} ERRORED: {exc}")
-                results.append(TestResult(
-                    test_name=test_case.name,
-                    scenario=test_case.scenario,
-                    passed=False,
-                    score=0.0,
-                    notes=f"Error: {exc}",
-                ))
+                results.append(
+                    TestResult(
+                        test_name=test_case.name,
+                        scenario=test_case.scenario,
+                        passed=False,
+                        score=0.0,
+                        notes=f"Error: {exc}",
+                    )
+                )
 
         # Summary
         total = len(results)

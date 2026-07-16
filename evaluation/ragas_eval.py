@@ -8,9 +8,7 @@ Uses local embeddings (all-MiniLM-L6-v2) to minimise API costs.
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Optional
 
 from src.utils.logger import get_logger
 from src.utils.models import EvaluationResult
@@ -35,6 +33,7 @@ class RagasEvaluator:
     def _check_ragas(self) -> bool:
         try:
             import ragas  # noqa: F401
+
             return True
         except ImportError:
             log.warning("[RAGAS] ragas not installed — using fallback evaluation")
@@ -76,14 +75,14 @@ class RagasEvaluator:
     ) -> EvaluationResult:
         """Run actual RAGAS evaluation."""
         try:
+            from datasets import Dataset
             from ragas import evaluate
             from ragas.metrics import (
-                faithfulness,
                 answer_relevancy,
                 context_precision,
                 context_recall,
+                faithfulness,
             )
-            from datasets import Dataset
 
             data = {
                 "question": [question],
@@ -99,7 +98,6 @@ class RagasEvaluator:
             dataset = Dataset.from_dict(data)
 
             # Use local embeddings to avoid OpenRouter costs
-            from sentence_transformers import SentenceTransformer
             from langchain_community.embeddings import HuggingFaceEmbeddings
 
             embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
@@ -191,9 +189,8 @@ class RagasEvaluator:
 
         # Additional citation coverage check
         import re
-        total_sentences = len([
-            s for s in re.split(r"[.!?]", briefing) if len(s.strip()) > 20
-        ])
+
+        total_sentences = len([s for s in re.split(r"[.!?]", briefing) if len(s.strip()) > 20])
         cited_sentences = len(re.findall(r"\[\d+\]", briefing))
         result.citation_coverage = min(cited_sentences / max(total_sentences * 0.5, 1), 1.0)
 

@@ -16,6 +16,7 @@ class TestGovernanceGuard:
 
     def setup_method(self):
         from src.agents.supervisor import GovernanceGuard
+
         self.guard = GovernanceGuard()
 
     def test_clean_input_passes(self):
@@ -102,6 +103,7 @@ class TestCitationGovernance:
 
     def setup_method(self):
         from src.tools.citation_tool import CitationTool
+
         self.tool = CitationTool()
         self.tool._run(action="clear")
 
@@ -135,6 +137,7 @@ class TestObservabilityBudget:
 
     def test_cost_budget_within_limit(self):
         from src.utils.observability import ObservabilityTracker
+
         tracker = ObservabilityTracker()
         run_id = "obs-test-001"
         tracker._ensure_run_metrics(run_id)
@@ -142,6 +145,7 @@ class TestObservabilityBudget:
 
     def test_cost_budget_exceeded(self):
         from src.utils.observability import ObservabilityTracker
+
         tracker = ObservabilityTracker()
         run_id = "obs-test-002"
         tracker._ensure_run_metrics(run_id)
@@ -151,6 +155,7 @@ class TestObservabilityBudget:
 
     def test_step_budget_within_limit(self):
         from src.utils.observability import ObservabilityTracker
+
         tracker = ObservabilityTracker()
         run_id = "obs-test-003"
         tracker._ensure_run_metrics(run_id)
@@ -158,6 +163,7 @@ class TestObservabilityBudget:
 
     def test_span_lifecycle(self):
         from src.utils.observability import ObservabilityTracker
+
         tracker = ObservabilityTracker()
         run_id = "obs-test-004"
         span = tracker.start_span(run_id, "research_agent", "web_search")
@@ -173,6 +179,7 @@ class TestAuditLogger:
 
     def setup_method(self):
         from src.utils.audit import AuditLogger
+
         self.logger = AuditLogger()
 
     def test_log_tool_call(self):

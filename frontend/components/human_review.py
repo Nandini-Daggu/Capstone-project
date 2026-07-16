@@ -28,7 +28,8 @@ def render_human_review_gate(
     st.markdown("---")
 
     # ── Dark navy review header ───────────────────────────────
-    st.markdown("""
+    st.markdown(
+        """
     <div class="review-header" style="
         background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%);
         border-radius: 14px;
@@ -61,17 +62,21 @@ def render_human_review_gate(
             ">Review the AI-generated briefing before it is finalised</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     # ── 4 key-metric columns ──────────────────────────────────
     c1, c2, c3, c4 = st.columns(4)
 
     # Confidence score with colour hint
-    conf_pct    = f"{confidence_score:.0%}"
-    conf_delta  = "High" if confidence_score >= 0.7 else ("Medium" if confidence_score >= 0.4 else "Low")
+    conf_pct = f"{confidence_score:.0%}"
+    conf_delta = (
+        "High" if confidence_score >= 0.7 else ("Medium" if confidence_score >= 0.4 else "Low")
+    )
     c1.metric("Confidence Score", conf_pct, delta=conf_delta)
-    c2.metric("Sources Used",     sources_count)
-    c3.metric("Flagged Items",    len(flagged_items))
+    c2.metric("Sources Used", sources_count)
+    c3.metric("Flagged Items", len(flagged_items))
 
     if confidence_score >= 0.7:
         c4.metric("AI Recommendation", "✅ Approve")
@@ -91,17 +96,17 @@ def render_human_review_gate(
             for i, item in enumerate(flagged_items[:8], 1):
                 st.markdown(
                     f'<div style="'
-                    f'background:#fffbeb;'
-                    f'border-left:4px solid #f59e0b;'
-                    f'padding:8px 14px;'
-                    f'border-radius:0 8px 8px 0;'
-                    f'margin-bottom:6px;'
-                    f'font-size:0.82rem;'
-                    f'color:#92400e;'
-                    f'line-height:1.5;'
+                    f"background:#fffbeb;"
+                    f"border-left:4px solid #f59e0b;"
+                    f"padding:8px 14px;"
+                    f"border-radius:0 8px 8px 0;"
+                    f"margin-bottom:6px;"
+                    f"font-size:0.82rem;"
+                    f"color:#92400e;"
+                    f"line-height:1.5;"
                     f'">'
-                    f'<strong>#{i}</strong> {item}'
-                    f'</div>',
+                    f"<strong>#{i}</strong> {item}"
+                    f"</div>",
                     unsafe_allow_html=True,
                 )
 
@@ -113,29 +118,29 @@ def render_human_review_gate(
     )
     if exec_match:
         exec_text = exec_match.group(1).strip()[:700]
-        trailing  = "…" if len(exec_match.group(1).strip()) > 700 else ""
+        trailing = "…" if len(exec_match.group(1).strip()) > 700 else ""
         st.markdown(
             f'<div style="'
-            f'background:#f0f5ff;'
-            f'border-left:4px solid #1e3a5f;'
-            f'border-radius:0 10px 10px 0;'
-            f'padding:1rem 1.4rem;'
-            f'margin:0.6rem 0 0.8rem 0;'
+            f"background:#f0f5ff;"
+            f"border-left:4px solid #1e3a5f;"
+            f"border-radius:0 10px 10px 0;"
+            f"padding:1rem 1.4rem;"
+            f"margin:0.6rem 0 0.8rem 0;"
             f'">'
             f'<div style="'
-            f'font-size:0.75rem;'
-            f'color:#1e3a5f;'
-            f'text-transform:uppercase;'
-            f'letter-spacing:0.08em;'
-            f'font-weight:700;'
-            f'margin-bottom:0.5rem;'
+            f"font-size:0.75rem;"
+            f"color:#1e3a5f;"
+            f"text-transform:uppercase;"
+            f"letter-spacing:0.08em;"
+            f"font-weight:700;"
+            f"margin-bottom:0.5rem;"
             f'">📄 Executive Summary Preview</div>'
             f'<div style="'
-            f'font-size:0.87rem;'
-            f'color:#374151;'
-            f'line-height:1.7;'
+            f"font-size:0.87rem;"
+            f"color:#374151;"
+            f"line-height:1.7;"
             f'">{exec_text}{trailing}</div>'
-            f'</div>',
+            f"</div>",
             unsafe_allow_html=True,
         )
 
@@ -196,9 +201,9 @@ def render_human_review_gate(
         )
         for section in sections_to_edit:
             pattern = rf"## {re.escape(section)}\n+(.*?)(?=\n## |\Z)"
-            match   = re.search(pattern, report_markdown, re.DOTALL)
+            match = re.search(pattern, report_markdown, re.DOTALL)
             current = match.group(1).strip() if match else ""
-            edited  = st.text_area(
+            edited = st.text_area(
                 f"📝 Edit: {section}",
                 value=current,
                 height=180,
@@ -223,13 +228,13 @@ def render_human_review_gate(
         if "Reject" in decision:
             st.markdown(
                 '<div class="warn-box"><div class="wb-text">'
-                '❌ Rejection requires feedback explaining the reason.</div></div>',
+                "❌ Rejection requires feedback explaining the reason.</div></div>",
                 unsafe_allow_html=True,
             )
         elif confidence_score >= 0.7:
             st.markdown(
                 '<div class="success-box" style="padding:0.7rem 1rem;">'
-                '✅ High confidence — report looks good to approve.</div>',
+                "✅ High confidence — report looks good to approve.</div>",
                 unsafe_allow_html=True,
             )
 
@@ -241,33 +246,33 @@ def render_human_review_gate(
             return None
 
         approved = "Reject" not in decision
-        action   = "APPROVED" if approved else "REJECTED"
-        color    = "#15803d" if approved else "#dc2626"
-        bg       = "#dcfce7" if approved else "#fee2e2"
-        icon     = "✅" if approved else "❌"
+        action = "APPROVED" if approved else "REJECTED"
+        color = "#15803d" if approved else "#dc2626"
+        bg = "#dcfce7" if approved else "#fee2e2"
+        icon = "✅" if approved else "❌"
 
         st.markdown(
             f'<div style="'
-            f'padding:1rem 1.4rem;'
-            f'background:{bg};'
-            f'border-radius:10px;'
-            f'text-align:center;'
-            f'font-weight:700;'
-            f'font-size:1rem;'
-            f'color:{color};'
-            f'margin-top:0.8rem;'
-            f'border:1.5px solid {color}30;'
+            f"padding:1rem 1.4rem;"
+            f"background:{bg};"
+            f"border-radius:10px;"
+            f"text-align:center;"
+            f"font-weight:700;"
+            f"font-size:1rem;"
+            f"color:{color};"
+            f"margin-top:0.8rem;"
+            f"border:1.5px solid {color}30;"
             f'">'
-            f'{icon} Review submitted — {action}'
-            f'</div>',
+            f"{icon} Review submitted — {action}"
+            f"</div>",
             unsafe_allow_html=True,
         )
 
         return {
-            "approved":        approved,
-            "feedback":        feedback,
+            "approved": approved,
+            "feedback": feedback,
             "edited_sections": edited_sections,
-            "reviewer_id":     st.session_state.get("reviewer_id", "streamlit_user"),
+            "reviewer_id": st.session_state.get("reviewer_id", "streamlit_user"),
         }
 
     return None

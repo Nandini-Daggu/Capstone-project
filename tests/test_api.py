@@ -19,8 +19,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-
 # ── Helpers ───────────────────────────────────────────────────────────────────
+
 
 def _make_run_status(
     run_id: str,
@@ -51,6 +51,7 @@ def _make_metrics() -> Dict[str, Any]:
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def app():
     """Import and return the FastAPI app with heavy deps patched at import time."""
@@ -62,6 +63,7 @@ def app():
         patch("evaluation.test_suite.evaluation_manager"),
     ):
         from backend.main import app as fastapi_app
+
         return fastapi_app
 
 
@@ -73,6 +75,7 @@ async def client(app):
 
 
 # ── Health endpoint ───────────────────────────────────────────────────────────
+
 
 @pytest.mark.api
 class TestHealthEndpoint:
@@ -123,6 +126,7 @@ class TestHealthEndpoint:
 
 
 # ── POST /generate ────────────────────────────────────────────────────────────
+
 
 @pytest.mark.api
 class TestGenerateEndpoint:
@@ -193,6 +197,7 @@ class TestGenerateEndpoint:
 
 # ── GET /status/{id} ─────────────────────────────────────────────────────────
 
+
 @pytest.mark.api
 class TestStatusEndpoint:
 
@@ -229,6 +234,7 @@ class TestStatusEndpoint:
 
 
 # ── GET /report/{id} ─────────────────────────────────────────────────────────
+
 
 @pytest.mark.api
 class TestReportEndpoint:
@@ -270,6 +276,7 @@ class TestReportEndpoint:
 
 # ── GET /metrics ──────────────────────────────────────────────────────────────
 
+
 @pytest.mark.api
 class TestMetricsEndpoint:
 
@@ -296,6 +303,7 @@ class TestMetricsEndpoint:
 
 # ── GET /history ──────────────────────────────────────────────────────────────
 
+
 @pytest.mark.api
 class TestHistoryEndpoint:
 
@@ -311,9 +319,7 @@ class TestHistoryEndpoint:
     @pytest.mark.asyncio
     async def test_history_returns_list(self, client):
         run_id = str(uuid.uuid4())
-        fake_runs = [
-            {"run_id": run_id, "industry": "SaaS", "status": "completed"}
-        ]
+        fake_runs = [{"run_id": run_id, "industry": "SaaS", "status": "completed"}]
 
         with patch("backend.main.db_manager") as mock_db:
             mock_db.list_runs.return_value = fake_runs
@@ -327,6 +333,7 @@ class TestHistoryEndpoint:
 
 
 # ── GET /logs/{id} ────────────────────────────────────────────────────────────
+
 
 @pytest.mark.api
 class TestLogsEndpoint:
@@ -366,6 +373,7 @@ class TestLogsEndpoint:
 
 # ── POST /review/{id} ────────────────────────────────────────────────────────
 
+
 @pytest.mark.api
 class TestReviewEndpoint:
 
@@ -379,9 +387,10 @@ class TestReviewEndpoint:
         }
 
         with (
-            patch("backend.main._run_status", {
-                run_id: _make_run_status(run_id, status="awaiting_review")
-            }),
+            patch(
+                "backend.main._run_status",
+                {run_id: _make_run_status(run_id, status="awaiting_review")},
+            ),
             patch("backend.main.audit_logger"),
             patch("backend.main.db_manager"),
         ):
@@ -398,9 +407,10 @@ class TestReviewEndpoint:
         }
 
         with (
-            patch("backend.main._run_status", {
-                run_id: _make_run_status(run_id, status="awaiting_review")
-            }),
+            patch(
+                "backend.main._run_status",
+                {run_id: _make_run_status(run_id, status="awaiting_review")},
+            ),
             patch("backend.main.audit_logger"),
             patch("backend.main.db_manager"),
         ):
@@ -410,6 +420,7 @@ class TestReviewEndpoint:
 
 
 # ── POST /export ──────────────────────────────────────────────────────────────
+
 
 @pytest.mark.api
 class TestExportEndpoint:
@@ -423,12 +434,15 @@ class TestExportEndpoint:
         }
 
         with (
-            patch("backend.main._run_status", {
-                run_id: {
-                    **_make_run_status(run_id),
-                    "briefing": sample_briefing,
-                }
-            }),
+            patch(
+                "backend.main._run_status",
+                {
+                    run_id: {
+                        **_make_run_status(run_id),
+                        "briefing": sample_briefing,
+                    }
+                },
+            ),
             patch("backend.main.db_manager") as mock_db,
         ):
             mock_db.get_report.return_value = {
@@ -458,24 +472,29 @@ class TestExportEndpoint:
 
 # ── Schema validation (BriefingRequest) ──────────────────────────────────────
 
+
 @pytest.mark.unit
 class TestBriefingRequestSchema:
     """Test Pydantic validation on the request schema."""
 
     def test_valid_minimal_request(self):
         from src.utils.schemas import BriefingRequest
+
         req = BriefingRequest(industry="SaaS", competitors=["Salesforce"])
         assert req.industry == "SaaS"
 
     def test_whitespace_only_competitor_stripped(self):
         from src.utils.schemas import BriefingRequest
+
         req = BriefingRequest(industry="SaaS", competitors=["Salesforce", "  "])
         assert "  " not in req.competitors
         assert len(req.competitors) == 1
 
     def test_too_many_competitors_raises(self):
-        from src.utils.schemas import BriefingRequest
         from pydantic import ValidationError
+
+        from src.utils.schemas import BriefingRequest
+
         with pytest.raises(ValidationError):
             BriefingRequest(
                 industry="SaaS",
@@ -484,10 +503,12 @@ class TestBriefingRequestSchema:
 
     def test_default_region_is_global(self):
         from src.utils.schemas import BriefingRequest
+
         req = BriefingRequest(industry="SaaS", competitors=["X"])
         assert req.region  # non-empty default
 
     def test_default_time_period_set(self):
         from src.utils.schemas import BriefingRequest
+
         req = BriefingRequest(industry="SaaS", competitors=["X"])
         assert req.time_period

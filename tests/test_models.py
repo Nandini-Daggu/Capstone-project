@@ -12,7 +12,8 @@ from pydantic import ValidationError
 
 class TestResearchItem:
     def test_valid_item(self):
-        from src.utils.models import ResearchItem, ResearchCategory
+        from src.utils.models import ResearchCategory, ResearchItem
+
         item = ResearchItem(
             competitor="Salesforce",
             category=ResearchCategory.NEWS,
@@ -25,7 +26,8 @@ class TestResearchItem:
         assert item.confidence_level.value == "high"
 
     def test_confidence_level_medium(self):
-        from src.utils.models import ResearchItem, ResearchCategory, ConfidenceLevel
+        from src.utils.models import ConfidenceLevel, ResearchCategory, ResearchItem
+
         item = ResearchItem(
             competitor="X",
             category=ResearchCategory.PRICING,
@@ -38,7 +40,8 @@ class TestResearchItem:
         assert item.confidence_level == ConfidenceLevel.MEDIUM
 
     def test_confidence_level_low(self):
-        from src.utils.models import ResearchItem, ResearchCategory, ConfidenceLevel
+        from src.utils.models import ConfidenceLevel, ResearchCategory, ResearchItem
+
         item = ResearchItem(
             competitor="X",
             category=ResearchCategory.PRICING,
@@ -54,6 +57,7 @@ class TestResearchItem:
 class TestCitedSource:
     def test_valid_source(self):
         from src.utils.models import CitedSource
+
         s = CitedSource(
             url="https://example.com",
             title="Example",
@@ -63,11 +67,13 @@ class TestCitedSource:
 
     def test_empty_url_raises(self):
         from src.utils.models import CitedSource
+
         with pytest.raises(ValidationError):
             CitedSource(url="", title="X", source_name="Y")
 
     def test_whitespace_url_raises(self):
         from src.utils.models import CitedSource
+
         with pytest.raises(ValidationError):
             CitedSource(url="   ", title="X", source_name="Y")
 
@@ -75,6 +81,7 @@ class TestCitedSource:
 class TestEvaluationResult:
     def test_overall_score_computed(self):
         from src.utils.models import EvaluationResult
+
         r = EvaluationResult(
             run_id="test-run",
             faithfulness=0.9,
@@ -88,6 +95,7 @@ class TestEvaluationResult:
 
     def test_fails_when_hallucination_high(self):
         from src.utils.models import EvaluationResult
+
         r = EvaluationResult(
             run_id="test-run",
             faithfulness=0.9,
@@ -100,12 +108,13 @@ class TestEvaluationResult:
 
     def test_fails_when_citation_coverage_low(self):
         from src.utils.models import EvaluationResult
+
         r = EvaluationResult(
             run_id="test-run",
             faithfulness=0.9,
             answer_relevancy=0.9,
             context_precision=0.9,
-            citation_coverage=0.3,   # Too low
+            citation_coverage=0.3,  # Too low
             hallucination_score=0.05,
         )
         assert r.passed is False
@@ -114,6 +123,7 @@ class TestEvaluationResult:
 class TestBriefingReport:
     def test_to_full_markdown(self, sample_briefing):
         from src.utils.models import BriefingReport, RunMetadata
+
         report = BriefingReport(
             run_id="test-001",
             industry="SaaS",
@@ -131,6 +141,7 @@ class TestBriefingReport:
 
     def test_metadata_section(self):
         from src.utils.models import BriefingReport, RunMetadata
+
         meta = RunMetadata(
             run_id="m-001",
             sources_used=8,
@@ -150,11 +161,13 @@ class TestBriefingReport:
 class TestRunMetadata:
     def test_default_run_id_generated(self):
         from src.utils.models import RunMetadata
+
         m = RunMetadata()
         assert len(m.run_id) == 36  # UUID format
 
     def test_status_pending_by_default(self):
         from src.utils.models import RunMetadata, RunStatus
+
         m = RunMetadata()
         assert m.status == RunStatus.PENDING
 
@@ -162,6 +175,7 @@ class TestRunMetadata:
 class TestSchemas:
     def test_briefing_request_valid(self):
         from src.utils.schemas import BriefingRequest
+
         req = BriefingRequest(
             industry="SaaS",
             competitors=["Salesforce", "HubSpot"],
@@ -172,6 +186,7 @@ class TestSchemas:
 
     def test_briefing_request_empty_competitor_stripped(self):
         from src.utils.schemas import BriefingRequest
+
         req = BriefingRequest(
             industry="SaaS",
             competitors=["Salesforce", "  ", "HubSpot"],
@@ -180,6 +195,7 @@ class TestSchemas:
 
     def test_briefing_request_too_many_competitors(self):
         from src.utils.schemas import BriefingRequest
+
         with pytest.raises(ValidationError):
             BriefingRequest(
                 industry="SaaS",

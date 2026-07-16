@@ -195,27 +195,55 @@ hr{border:none!important;border-top:1px solid #E5E7EB!important;margin:20px 0!im
 """
 
 INDUSTRIES = [
-    "SaaS / CRM", "Fintech / Payments", "AI / LLM / Generative AI",
-    "E-commerce / Retail", "Healthcare SaaS", "Cybersecurity",
-    "Cloud Infrastructure", "HR Tech", "MarTech / AdTech",
-    "EdTech", "LegalTech", "PropTech", "Supply Chain Tech",
-    "Autonomous Vehicles", "Semiconductors", "Custom...",
+    "SaaS / CRM",
+    "Fintech / Payments",
+    "AI / LLM / Generative AI",
+    "E-commerce / Retail",
+    "Healthcare SaaS",
+    "Cybersecurity",
+    "Cloud Infrastructure",
+    "HR Tech",
+    "MarTech / AdTech",
+    "EdTech",
+    "LegalTech",
+    "PropTech",
+    "Supply Chain Tech",
+    "Autonomous Vehicles",
+    "Semiconductors",
+    "Custom...",
 ]
 REGIONS = [
-    "Global", "North America", "Europe", "Asia Pacific",
-    "Latin America", "Middle East & Africa", "United States",
-    "United Kingdom", "India", "Southeast Asia",
+    "Global",
+    "North America",
+    "Europe",
+    "Asia Pacific",
+    "Latin America",
+    "Middle East & Africa",
+    "United States",
+    "United Kingdom",
+    "India",
+    "Southeast Asia",
 ]
 TIME_PERIODS = [
-    "last 7 days", "last 14 days", "last 30 days",
-    "last 60 days", "last 90 days", "last 6 months",
+    "last 7 days",
+    "last 14 days",
+    "last 30 days",
+    "last 60 days",
+    "last 90 days",
+    "last 6 months",
 ]
 EXPORT_FORMATS = ["markdown", "pdf", "pptx", "html", "json"]
 STATUS_COLORS = {
-    "completed": "🟢", "running": "🔵", "failed": "🔴",
-    "pending": "🟡", "rejected": "🟠",
+    "completed": "🟢",
+    "running": "🔵",
+    "failed": "🔴",
+    "pending": "🟡",
+    "rejected": "🟠",
 }
 AGENT_STEPS = [
-    ("🔍", "Research"), ("📊", "Analysis"), ("✍️", "Writing"),
-    ("🛡️", "Review"), ("📦", "Export"),
+    ("🔍", "Research"),
+    ("📊", "Analysis"),
+    ("✍️", "Writing"),
+    ("🛡️", "Review"),
+    ("📦", "Export"),
 ]

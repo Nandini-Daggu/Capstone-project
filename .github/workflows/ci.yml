@@ -74,17 +74,17 @@ jobs:
                       mypy==1.13.0 types-pyyaml types-requests types-python-dateutil
 
       - name: Check formatting (black)
-        run: black --check --diff .
+        run: black --check --diff --line-length=100 src/ backend/ crew/ config/ evaluation/ frontend/ tests/ app.py
 
       - name: Check import order (isort)
-        run: isort --check-only --diff .
+        run: isort --check-only --diff --profile=black --line-length=100 src/ backend/ crew/ config/ evaluation/ frontend/ tests/ app.py
 
       - name: Lint (flake8)
         run: |
           flake8 src/ backend/ crew/ config/ evaluation/ \
             --max-line-length=100 \
-            --extend-ignore=D100,D101,D102,D103,D104,D105,D107,E501 \
-            --exclude=.venv,build,dist,__pycache__,*.egg-info
+            --extend-ignore=D100,D101,D102,D103,D104,D105,D107,E501,E203 \
+            --exclude=.venv,venv312,build,dist,__pycache__,*.egg-info
 
       - name: Type check (mypy) — non-blocking
         run: |

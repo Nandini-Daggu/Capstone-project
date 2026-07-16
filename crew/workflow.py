@@ -13,14 +13,18 @@ Handles the full pipeline including:
 
 from __future__ import annotations
 
-import asyncio
 import time
 import uuid
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeout
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional
 
 from config.settings import settings
+from src.tools.citation_tool import _registry
+from src.tools.pdf_export import pdf_export_tool
+from src.tools.ppt_export import ppt_export_tool
+from src.tools.report_export import report_export_tool
 from src.utils.audit import audit_logger
 from src.utils.database import db_manager
 from src.utils.logger import get_logger
@@ -31,13 +35,8 @@ from src.utils.models import (
     RunMetadata,
     RunStatus,
 )
-from src.utils.observability import obs_tracker
-from src.tools.citation_tool import citation_tool, _registry
-from src.tools.pdf_export import pdf_export_tool
-from src.tools.ppt_export import ppt_export_tool
-from src.tools.report_export import report_export_tool
+
 from .crew import IntelligenceCrew
-from .memory import get_run_memory, clear_run_memory
 
 log = get_logger(__name__)
 
@@ -199,15 +198,18 @@ class IntelligenceWorkflow:
         self._progress("Saving report...", 95)
         try:
             import json
-            db_manager.save_report({
-                "run_id": run_id,
-                "title": report.title,
-                "industry": report.industry,
-                "competitors": json.dumps(competitors),
-                "full_markdown": report.full_markdown or briefing_text,
-                "sources_json": json.dumps([s.model_dump() for s in sources]),
-                "approved": True,
-            })
+
+            db_manager.save_report(
+                {
+                    "run_id": run_id,
+                    "title": report.title,
+                    "industry": report.industry,
+                    "competitors": json.dumps(competitors),
+                    "full_markdown": report.full_markdown or briefing_text,
+                    "sources_json": json.dumps([s.model_dump() for s in sources]),
+                    "approved": True,
+                }
+            )
         except Exception as db_exc:
             log.warning(f"[Workflow] DB save_report failed (non-fatal): {db_exc}")
 
@@ -321,6 +323,7 @@ class IntelligenceWorkflow:
         for section_key, new_content in edits.items():
             # Simple section replacement
             import re
+
             pattern = rf"(## {re.escape(section_key)}.*?\n)(.*?)(?=\n## |\Z)"
             replacement = rf"\g<1>{new_content}\n"
             text = re.sub(pattern, replacement, text, flags=re.DOTALL | re.IGNORECASE)
@@ -361,10 +364,13 @@ class IntelligenceWorkflow:
 
     def _update_db_status(self, run_id: str, status: RunStatus) -> None:
         try:
-            db_manager.update_run(run_id, {
-                "status": status.value,
-                "completed_at": datetime.now(timezone.utc),
-            })
+            db_manager.update_run(
+                run_id,
+                {
+                    "status": status.value,
+                    "completed_at": datetime.now(timezone.utc),
+                },
+            )
         except Exception:
             pass
 
