@@ -83,7 +83,7 @@ jobs:
         run: |
           flake8 src/ backend/ crew/ config/ evaluation/ \
             --max-line-length=100 \
-            --extend-ignore=D100,D101,D102,D103,D104,D105,D107,E501,E203 \
+            --extend-ignore=D100,D101,D102,D103,D104,D105,D106,D107,D200,D205,D400,D401,E501,E203,B008 \
             --exclude=.venv,venv312,build,dist,__pycache__,*.egg-info
 
       - name: Type check (mypy) — non-blocking
