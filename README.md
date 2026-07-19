@@ -214,6 +214,9 @@ Install packages
 ```bash
 pip install -r requirements.txt
 ```
+RUN PATH
+```bash
+python -m streamlit run ui\app.py
 
 ---
 
